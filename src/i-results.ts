@@ -1,4 +1,6 @@
 export interface IResults {
-    roomID:string,
-    votes:{[key:string]:string}
+    type:"result";
+    roomID:string;
+    reveal:boolean;
+    votes:{[key:string]:string};
 }

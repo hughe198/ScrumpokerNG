@@ -1,19 +1,16 @@
-
-
 <html>
-    <div class = "container">
+  <div class="container">
+    <input type="text" [(ngModel)]="voter" placeholder="Enter Name" />
+    <input type="text" [(ngModel)]="roomID" placeholder="Enter Room ID" />
 
-        <input type="text" [(value)]="this.name">
-        <button class = "btn" (click)="connect(this.name,this.roomID)">Join Room</button>
-        <button class = "btn">Create New Room</button>
+    <button class="btn" (click)="connect(this.voter, this.roomID)">
+      Join Room
+    </button>
+  </div>
+  <div class="container">
+    <button class="btn" (click)="createNewRoom()">Create New Room</button>
+  </div>
 
-
-
-    </div>
-
-
-
-
-    
+  <app-room [connection]="active"></app-room>
 
 </html>
