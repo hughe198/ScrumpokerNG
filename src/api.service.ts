@@ -1,10 +1,12 @@
-import { Injectable } from '@angular/core';
+
 import { ICommand } from './i-command';
 import { ISendVote } from './i-send-votes';
-import { Observable, Subject } from 'rxjs';
+
 import { IResults } from './i-results';
 import { IError } from './i-error';
 import { ISuccess } from './i-success';
+import { Injectable } from '@angular/core';
+import { Observable, Subject } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })

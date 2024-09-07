@@ -1,14 +1,16 @@
-import { Component, Input } from '@angular/core';
+
 import { ApiService } from '../api.service';
 import { LocalStorageService } from '../local-storage.service';
 import { IUserDetails } from '../i-user-details';
 import { IResults, IVotes } from '../i-results';
 import { ISendVote as ISendVote } from '../i-send-votes';
-import { CommonModule, NgFor } from '@angular/common';
+import { Component, Input } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+
 @Component({
   selector: 'app-room',
   standalone: true,
-  imports: [CommonModule,NgFor],
+  imports: [FormsModule],
   templateUrl: './room.component.html',
   styleUrl: './room.component.css'
 })
@@ -17,11 +19,16 @@ import { CommonModule, NgFor } from '@angular/common';
 export class RoomComponent {
   @Input() 
   set connection(active:boolean){
-    if (active){this.connectRoom()}
+    if (active){
+      this.connectRoom()
+      const userDetails: IUserDetails | null = this.localstorage.getUserDetails()
+      this.name = userDetails!.voter 
+   }
   }
+  name:string =""
   votes!:IVotes
   results!:IResults 
-
+  fakeVoteText= "12"
   constructor(private apiService: ApiService, private localstorage: LocalStorageService) {
   }
   connectRoom(){
@@ -39,4 +46,16 @@ export class RoomComponent {
     }     
   }
 
+  objectKeys(obj: IVotes): string[] {
+    return Object.keys(obj);
+  }
+
+  fakevote(){
+    const userDetails: IUserDetails | null = this.localstorage.getUserDetails()
+    const fakeVote:ISendVote={voter:this.name,vote:this.fakeVoteText}
+    this.apiService.sendVote(fakeVote)
+  }
 }
+
+
+

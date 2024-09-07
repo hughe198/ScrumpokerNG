@@ -6,5 +6,5 @@ export interface IResults {
 }
 
 export interface IVotes{
-    votes:{[key:string]:string};
+    [key:string]:string;
 }

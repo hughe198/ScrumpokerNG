@@ -1,7 +1,10 @@
-@for= (let result in results; result.votes; let idx = $index)
-
-
-<div *ngFor="let [voter, vote] of Object.entries(votes)">
-    <p>Voter: {{ voter }}</p>
-    <p>Vote: {{ vote }}</p>
-  </div>
+<ul>
+    @for (voter of objectKeys(votes); track voter) {
+      <li>{{ voter }}: {{ votes[voter] }}</li>
+    }
+    @empty {
+      <li>No products found.</li>
+    }
+  <input type ="button" (click)="fakevote()" value="Vote">
+</ul>
+<input type="text" [(ngModel)]="fakeVoteText" placeholder="Enter vote">
