@@ -1,4 +1,4 @@
-export interface IVoter {
+export interface ISendVote {
     voter:string,
     vote:string
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ICommand } from './i-command';
-import { IVoter } from './i-voter';
+import { ISendVote } from './i-send-votes';
 import { Observable, Subject } from 'rxjs';
 import { IResults } from './i-results';
 import { IError } from './i-error';
@@ -9,7 +9,7 @@ import { ISuccess } from './i-success';
   providedIn: 'root'
 })
 export class ApiService {
-  private messageSubject = new Subject<IResults>
+  private results = new Subject<IResults>
   socket?: WebSocket
   connect(roomID: string): void {
     this.socket = new WebSocket(`ws://127.0.0.1:8000/ws/${roomID}`)
@@ -21,7 +21,7 @@ export class ApiService {
       const data: WebSocketMessage = JSON.parse(event.data)
       switch (data.type) {
         case "result":
-          this.messageSubject.next(data)
+          this.results.next(data)
           break
         case "error":
           console.error("error", data.error);
@@ -42,7 +42,7 @@ export class ApiService {
       console.error('Websocket Error', error)
     }
   }
-  sendVote(message: IVoter) {
+  sendVote(message: ISendVote) {
     if (this.socket) {
       if (this.socket.readyState === WebSocket.OPEN) {
         this.socket.send(JSON.stringify(message))
@@ -67,7 +67,7 @@ export class ApiService {
     }
   }
   getVotes(): Observable<IResults> {
-    return this.messageSubject.asObservable()
+    return this.results.asObservable()
   }
 
 }

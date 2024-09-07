@@ -1,1 +1,7 @@
-<p>room works!</p>
+@for= (let result in results; result.votes; let idx = $index)
+
+
+<div *ngFor="let [voter, vote] of Object.entries(votes)">
+    <p>Voter: {{ voter }}</p>
+    <p>Vote: {{ vote }}</p>
+  </div>
