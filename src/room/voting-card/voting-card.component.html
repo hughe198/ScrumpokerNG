@@ -1,1 +1,19 @@
-<p>voting-card works!</p>
+<div class="container mx-3">
+  Voting Card:
+  <select [(ngModel)]="selectedOption" (change)="onCardChange($event)" class="form-select">
+    @for(card of votingCard; track card.name){
+      <option (value)="card.name">{{card.name}}</option>
+    }
+  </select>
+  <div class="votingCard">
+
+
+
+  @for (option of selectedOptions ; track option) {
+    <div class="votingOption" (click)="voteClicked(option.value)">
+      <img [src]="option.icon" class = "img-thumbnail square-img"/>
+      <span>{{ option.value }}</span>
+    </div>
+  }
+</div>
+</div>

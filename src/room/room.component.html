@@ -3,8 +3,9 @@
       <li>{{ voter }}: {{ votes[voter] }}</li>
     }
     @empty {
-      <li>No products found.</li>
+      <li>No Voters found.</li>
     }
-  <input type ="button" (click)="fakevote()" value="Vote">
+  <!-- <input type ="button" (click)="fakevote()" value="Vote">
 </ul>
-<input type="text" [(ngModel)]="fakeVoteText" placeholder="Enter vote">
+<input type="text" [(ngModel)]="fakeVoteText" placeholder="Enter vote"> -->
+<app-voting-card (vote)="voted($event)"></app-voting-card>

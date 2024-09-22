@@ -23,6 +23,7 @@ export class ApiService {
       const data: WebSocketMessage = JSON.parse(event.data)
       switch (data.type) {
         case "result":
+          console.log(data)
           this.results.next(data)
           break
         case "error":
