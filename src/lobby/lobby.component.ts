@@ -18,6 +18,7 @@ export class LobbyComponent implements OnInit {
 
   voter: string | null = ""
   roomID: string | null = null
+  votingCard: string | null = null
   localStorage: boolean = false
   active = false
   ngOnInit(): void {
@@ -26,17 +27,19 @@ export class LobbyComponent implements OnInit {
     if (local !== null) {
       this.voter = local.voter
       this.roomID = local.roomID
+      this.votingCard = local.votingCard
       this.localStorage = true
     } else {
       this.roomID = uuidv4();
+      this.votingCard="fibonacci"
     }
   }
 
-  connect(name: string | null, roomID: string | null) {
+  connect(name: string | null, roomID: string | null, votingCard : string | null) {
     console.log(this.localStorage)
-    if (name && roomID && validator.isUUID(roomID)) {
+    if (name && roomID && votingCard && validator.isUUID(roomID)) {
       this.active = true
-      const details: IUserDetails = { voter: name, roomID: roomID }
+      const details: IUserDetails = { voter: name, roomID: roomID, votingCard:votingCard}
       this.localStorageService.setUserDetails(details)
     }
     else {

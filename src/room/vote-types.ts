@@ -4,7 +4,7 @@ export const voteFibonacci:IVoteType=
 {
   name:"Fibonacci",
   identifier:"fibonacci",
-  generateOptions: ()=>[
+  selectedOptions: ()=>[
     {value:"1",icon:"assets/icons/fibonacci/1.png"},
     {value:"2",icon:"assets/icons/fibonacci/2.png"},
     {value:"3",icon:"assets/icons/fibonacci/3.png"},
@@ -20,7 +20,7 @@ export const voteFibonacci:IVoteType=
   export const voteExponential:IVoteType={
   name:"Exponential",
   identifier:"exponential",
-  generateOptions: ()=>[
+  selectedOptions: ()=>[
     {value:"1",icon:"assets/icons/exponential/1.png"},
     {value:"2",icon:"assets/icons/exponential/2.png"},
     {value:"4",icon:"assets/icons/exponential/3.png"},
@@ -36,7 +36,7 @@ export const voteFibonacci:IVoteType=
   export const voteLinear:IVoteType={
   name:"Linear",
   identifier:"linear",
-  generateOptions: ()=>[
+  selectedOptions: ()=>[
     {value:"1",icon:"assets/icons/linear/1.png"},
     {value:"2",icon:"assets/icons/linear/2.png"},
     {value:"3",icon:"assets/icons/linear/3.png"},
@@ -52,7 +52,7 @@ export const voteFibonacci:IVoteType=
   export const voteTshirts:IVoteType={
   name:"T-Shirt Sizes",
   identifier:"t-shirts",
-  generateOptions: ()=>[
+  selectedOptions: ()=>[
     {value:"XS",icon:"assets/icons/t-shirts/1.png"},
     {value:"S",icon:"assets/icons/t-shirts/2.png"},
     {value:"M",icon:"assets/icons/t-shirts/3.png"},

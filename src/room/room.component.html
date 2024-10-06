@@ -1,3 +1,4 @@
+@if (active) {
 <ul>
     @for (voter of objectKeys(votes); track voter) {
       <li>{{ voter }}: {{ votes[voter] }}</li>
@@ -5,7 +6,8 @@
     @empty {
       <li>No Voters found.</li>
     }
-  <!-- <input type ="button" (click)="fakevote()" value="Vote">
+      <app-voting-card [onCardChoiceChange]="cardChoice" (userDetails)="userDetails" (vote)="voted($event)" (votingCardChoice)="votingCardChange($event)"></app-voting-card>
+
+
 </ul>
-<input type="text" [(ngModel)]="fakeVoteText" placeholder="Enter vote"> -->
-<app-voting-card (vote)="voted($event)"></app-voting-card>
+}

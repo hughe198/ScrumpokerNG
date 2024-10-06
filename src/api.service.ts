@@ -7,6 +7,7 @@ import { IError } from './i-error';
 import { ISuccess } from './i-success';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
+import { ICardChange } from './i-card-change';
 @Injectable({
   providedIn: 'root'
 })
@@ -71,6 +72,15 @@ export class ApiService {
   }
   getVotes(): Observable<IResults> {
     return this.results.asObservable()
+  }
+  changeCards(card:ICardChange){
+    if (this.socket) {
+      if (this.socket.readyState === WebSocket.OPEN) {
+        this.socket.send(JSON.stringify(card))
+      } else {
+        console.error("Websocket connection is not open")
+      }
+    }
   }
 
 }

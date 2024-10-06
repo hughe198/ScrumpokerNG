@@ -1,4 +1,4 @@
 export interface ISendVote {
     voter:string,
-    vote:string
+    vote:string,
 }
