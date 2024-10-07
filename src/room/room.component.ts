@@ -4,21 +4,25 @@ import { LocalStorageService } from '../local-storage.service';
 import { IUserDetails } from '../i-user-details';
 import { IResults, IVotes } from '../i-results';
 import { ISendVote as ISendVote } from '../i-send-votes';
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { VotingCardComponent } from "./voting-card/voting-card.component";
 import { ICardChange } from '../i-card-change';
-
+import { ICommand } from '../i-command';
+import {FontAwesomeModule} from '@fortawesome/angular-fontawesome'
+import { faC, faCoffee } from '@fortawesome/free-solid-svg-icons';
 @Component({
   selector: 'app-room',
   standalone: true,
-  imports: [FormsModule, VotingCardComponent],
+  imports: [FormsModule, VotingCardComponent,FontAwesomeModule],
   templateUrl: './room.component.html',
   styleUrl: './room.component.css'
 })
 
 
-export class RoomComponent {
+export class RoomComponent implements OnDestroy {
+
+  faCoffee = faCoffee
   active:boolean = false
   @Input()
   set connection(active: boolean) {
@@ -32,7 +36,7 @@ export class RoomComponent {
   name: string = ""
   votes!: IVotes
   results!: IResults
-  reveal:boolean = true
+  reveal:boolean = false
   voteString: string = ""
   cardChoice: string
   userDetails: IUserDetails | null
@@ -40,6 +44,11 @@ export class RoomComponent {
     this.userDetails = localstorage.getUserDetails()
     this.cardChoice = this.userDetails?.votingCard ?? "fibonacci"
 
+  }
+  ngOnDestroy(): void {
+    this.reveal = !this.reveal
+    const command:ICommand ={command:"Exit_room"}
+    this.apiService.sendCommand(command)
   }
   connectRoom() {
     const userDetails: IUserDetails | null = this.localstorage.getUserDetails()
@@ -80,6 +89,20 @@ export class RoomComponent {
     const cardChange:ICardChange = {Card_Change:card}
     this.apiService.changeCards(cardChange)
   }
+
+  revealClicked( ){
+    this.reveal = !this.reveal
+    const command:ICommand ={command:"Reveal_votes"}
+    this.apiService.sendCommand(command)
+  }
+
+  clearClicked(){
+    const command:ICommand ={command:"Clear_votes"}
+    this.apiService.sendCommand(command)
+
+  }
+
+
 
 }
 

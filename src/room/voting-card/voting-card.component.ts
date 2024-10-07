@@ -3,6 +3,7 @@ import { voteExponential, voteFibonacci, voteLinear, voteTshirts } from '../vote
 import { FormsModule } from '@angular/forms';
 import { IUserDetails } from '../../i-user-details';
 import { LocalStorageService } from '../../local-storage.service';
+
 @Component({
   selector: 'app-voting-card',
   standalone: true,

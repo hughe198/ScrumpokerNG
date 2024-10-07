@@ -1,13 +1,28 @@
 @if (active) {
 <ul>
-    @for (voter of objectKeys(votes); track voter) {
-      <li>{{ voter }}: {{ votes[voter] }}</li>
-    }
-    @empty {
-      <li>No Voters found.</li>
-    }
-      <app-voting-card [onCardChoiceChange]="cardChoice" (userDetails)="userDetails" (vote)="voted($event)" (votingCardChoice)="votingCardChange($event)"></app-voting-card>
+  @for (voter of objectKeys(votes); track voter) {
 
+  <li>
+    {{ voter }}: 
+    @if(reveal){
+      <span>{{ votes[voter] }}</span> 
+    } @if(!reveal)
+    {<span
+      ><fa-icon [icon]="faCoffee"></fa-icon></span
+    >}
+  </li>
 
+  }
+  @empty {
+  <li>No Voters found.</li>
+  }
+  <button (click)="revealClicked()">Reveal Votes</button>
+  <button (click)="clearClicked()">Clear votes</button>
+  <app-voting-card
+    [onCardChoiceChange]="cardChoice"
+    (userDetails)="(userDetails)"
+    (vote)="voted($event)"
+    (votingCardChoice)="votingCardChange($event)"
+  ></app-voting-card>
 </ul>
 }
