@@ -42,99 +42,99 @@ testem.log
 .DS_Store
 Thumbs.db
 
-src/room/voting-card/icons/exponential/1.png
-src/room/voting-card/icons/exponential/2.png
-src/room/voting-card/icons/exponential/3.png
-src/room/voting-card/icons/exponential/4.png
-src/room/voting-card/icons/exponential/5.png
-src/room/voting-card/icons/exponential/6.png
-src/room/voting-card/icons/exponential/7.png
-src/room/voting-card/icons/exponential/8.png
-src/room/voting-card/icons/exponential/9.png
-src/room/voting-card/icons/exponential/original.webp
-src/room/voting-card/icons/fibonacci/1.png
-src/room/voting-card/icons/fibonacci/2.png
-src/room/voting-card/icons/fibonacci/3.png
-src/room/voting-card/icons/fibonacci/4.png
-src/room/voting-card/icons/fibonacci/5.png
-src/room/voting-card/icons/fibonacci/6.png
-src/room/voting-card/icons/fibonacci/7.png
-src/room/voting-card/icons/fibonacci/8.png
-src/room/voting-card/icons/fibonacci/9.png
-src/room/voting-card/icons/fibonacci/fibIcon.webp
-src/room/voting-card/icons/fibonacci/original.jpg
-src/room/voting-card/icons/linear/1.png
-src/room/voting-card/icons/linear/2.png
-src/room/voting-card/icons/linear/3.png
-src/room/voting-card/icons/linear/4.png
-src/room/voting-card/icons/linear/5.png
-src/room/voting-card/icons/linear/6.png
-src/room/voting-card/icons/linear/7.png
-src/room/voting-card/icons/linear/8.png
-src/room/voting-card/icons/linear/9.png
-src/room/voting-card/icons/linear/original.webp
-src/room/voting-card/icons/t-shirts/1.png
-src/room/voting-card/icons/t-shirts/2.png
-src/room/voting-card/icons/t-shirts/3.png
-src/room/voting-card/icons/t-shirts/4.png
-src/room/voting-card/icons/t-shirts/5.png
-src/room/voting-card/icons/t-shirts/6.png
-src/room/voting-card/icons/t-shirts/7.png
-src/room/voting-card/icons/t-shirts/8.png
-src/room/voting-card/icons/t-shirts/9.png
-src/room/voting-card/icons/t-shirts/10.png
-src/room/voting-card/icons/t-shirts/11.png
-src/room/voting-card/icons/t-shirts/12.png
-src/room/voting-card/icons/t-shirts/13.png
-src/room/voting-card/icons/t-shirts/14.png
-src/room/voting-card/icons/t-shirts/15.png
-src/room/voting-card/icons/t-shirts/16.png
-src/room/voting-card/icons/t-shirts/origianl.webp
-src/assets/icons/exponential/1.png
-src/assets/icons/exponential/2.png
-src/assets/icons/exponential/3.png
-src/assets/icons/exponential/4.png
-src/assets/icons/exponential/5.png
-src/assets/icons/exponential/6.png
-src/assets/icons/exponential/7.png
-src/assets/icons/exponential/8.png
-src/assets/icons/exponential/9.png
-src/assets/icons/exponential/original.webp
-src/assets/icons/fibonacci/1.png
-src/assets/icons/fibonacci/2.png
-src/assets/icons/fibonacci/3.png
-src/assets/icons/fibonacci/4.png
-src/assets/icons/fibonacci/5.png
-src/assets/icons/fibonacci/6.png
-src/assets/icons/fibonacci/7.png
-src/assets/icons/fibonacci/8.png
-src/assets/icons/fibonacci/9.png
-src/assets/icons/fibonacci/fibIcon.webp
-src/assets/icons/fibonacci/original.jpg
-src/assets/icons/linear/1.png
-src/assets/icons/linear/2.png
-src/assets/icons/linear/3.png
-src/assets/icons/linear/4.png
-src/assets/icons/linear/5.png
-src/assets/icons/linear/6.png
-src/assets/icons/linear/7.png
-src/assets/icons/linear/8.png
-src/assets/icons/linear/9.png
-src/assets/icons/linear/original.webp
-src/assets/icons/t-shirts/1.png
-src/assets/icons/t-shirts/2.png
-src/assets/icons/t-shirts/3.png
-src/assets/icons/t-shirts/4.png
-src/assets/icons/t-shirts/5.png
-src/assets/icons/t-shirts/6.png
-src/assets/icons/t-shirts/7.png
-src/assets/icons/t-shirts/8.png
-src/assets/icons/t-shirts/9.png
-src/assets/icons/t-shirts/10.png
-src/assets/icons/t-shirts/11.png
-src/assets/icons/t-shirts/12.png
-src/assets/icons/t-shirts/13.png
-src/assets/icons/t-shirts/14.png
-src/assets/icons/t-shirts/15.png
-src/assets/icons/t-shirts/16.png
-src/assets/icons/t-shirts/origianl.webp
+# src/room/voting-card/icons/exponential/1.png
+# src/room/voting-card/icons/exponential/2.png
+# src/room/voting-card/icons/exponential/3.png
+# src/room/voting-card/icons/exponential/4.png
+# src/room/voting-card/icons/exponential/5.png
+# src/room/voting-card/icons/exponential/6.png
+# src/room/voting-card/icons/exponential/7.png
+# src/room/voting-card/icons/exponential/8.png
+# src/room/voting-card/icons/exponential/9.png
+# src/room/voting-card/icons/exponential/original.webp
+# src/room/voting-card/icons/fibonacci/1.png
+# src/room/voting-card/icons/fibonacci/2.png
+# src/room/voting-card/icons/fibonacci/3.png
+# src/room/voting-card/icons/fibonacci/4.png
+# src/room/voting-card/icons/fibonacci/5.png
+# src/room/voting-card/icons/fibonacci/6.png
+# src/room/voting-card/icons/fibonacci/7.png
+# src/room/voting-card/icons/fibonacci/8.png
+# src/room/voting-card/icons/fibonacci/9.png
+# src/room/voting-card/icons/fibonacci/fibIcon.webp
+# src/room/voting-card/icons/fibonacci/original.jpg
+# src/room/voting-card/icons/linear/1.png
+# src/room/voting-card/icons/linear/2.png
+# src/room/voting-card/icons/linear/3.png
+# src/room/voting-card/icons/linear/4.png
+# src/room/voting-card/icons/linear/5.png
+# src/room/voting-card/icons/linear/6.png
+# src/room/voting-card/icons/linear/7.png
+# src/room/voting-card/icons/linear/8.png
+# src/room/voting-card/icons/linear/9.png
+# src/room/voting-card/icons/linear/original.webp
+# src/room/voting-card/icons/t-shirts/1.png
+# src/room/voting-card/icons/t-shirts/2.png
+# src/room/voting-card/icons/t-shirts/3.png
+# src/room/voting-card/icons/t-shirts/4.png
+# src/room/voting-card/icons/t-shirts/5.png
+# src/room/voting-card/icons/t-shirts/6.png
+# src/room/voting-card/icons/t-shirts/7.png
+# src/room/voting-card/icons/t-shirts/8.png
+# src/room/voting-card/icons/t-shirts/9.png
+# src/room/voting-card/icons/t-shirts/10.png
+# src/room/voting-card/icons/t-shirts/11.png
+# src/room/voting-card/icons/t-shirts/12.png
+# src/room/voting-card/icons/t-shirts/13.png
+# src/room/voting-card/icons/t-shirts/14.png
+# src/room/voting-card/icons/t-shirts/15.png
+# src/room/voting-card/icons/t-shirts/16.png
+# src/room/voting-card/icons/t-shirts/origianl.webp
+# src/assets/icons/exponential/1.png
+# src/assets/icons/exponential/2.png
+# src/assets/icons/exponential/3.png
+# src/assets/icons/exponential/4.png
+# src/assets/icons/exponential/5.png
+# src/assets/icons/exponential/6.png
+# src/assets/icons/exponential/7.png
+# src/assets/icons/exponential/8.png
+# src/assets/icons/exponential/9.png
+# src/assets/icons/exponential/original.webp
+# src/assets/icons/fibonacci/1.png
+# src/assets/icons/fibonacci/2.png
+# src/assets/icons/fibonacci/3.png
+# src/assets/icons/fibonacci/4.png
+# src/assets/icons/fibonacci/5.png
+# src/assets/icons/fibonacci/6.png
+# src/assets/icons/fibonacci/7.png
+# src/assets/icons/fibonacci/8.png
+# src/assets/icons/fibonacci/9.png
+# src/assets/icons/fibonacci/fibIcon.webp
+# src/assets/icons/fibonacci/original.jpg
+# src/assets/icons/linear/1.png
+# src/assets/icons/linear/2.png
+# src/assets/icons/linear/3.png
+# src/assets/icons/linear/4.png
+# src/assets/icons/linear/5.png
+# src/assets/icons/linear/6.png
+# src/assets/icons/linear/7.png
+# src/assets/icons/linear/8.png
+# src/assets/icons/linear/9.png
+# src/assets/icons/linear/original.webp
+# src/assets/icons/t-shirts/1.png
+# src/assets/icons/t-shirts/2.png
+# src/assets/icons/t-shirts/3.png
+# src/assets/icons/t-shirts/4.png
+# src/assets/icons/t-shirts/5.png
+# src/assets/icons/t-shirts/6.png
+# src/assets/icons/t-shirts/7.png
+# src/assets/icons/t-shirts/8.png
+# src/assets/icons/t-shirts/9.png
+# src/assets/icons/t-shirts/10.png
+# src/assets/icons/t-shirts/11.png
+# src/assets/icons/t-shirts/12.png
+# src/assets/icons/t-shirts/13.png
+# src/assets/icons/t-shirts/14.png
+# src/assets/icons/t-shirts/15.png
+# src/assets/icons/t-shirts/16.png
+# src/assets/icons/t-shirts/origianl.webp
