@@ -1,28 +1,44 @@
 @if (active) {
-<ul>
-  @for (voter of objectKeys(votes); track voter) {
-
-  <li>
-    {{ voter }}: 
-    @if(reveal){
-      <span>{{ votes[voter] }}</span> 
-    } @if(!reveal)
-    {<span
-      ><fa-icon [icon]="faCoffee"></fa-icon></span
-    >}
-  </li>
-
-  }
-  @empty {
-  <li>No Voters found.</li>
-  }
-  <button (click)="revealClicked()">Reveal Votes</button>
-  <button (click)="clearClicked()">Clear votes</button>
-  <app-voting-card
-    [onCardChoiceChange]="cardChoice"
-    (userDetails)="(userDetails)"
-    (vote)="voted($event)"
-    (votingCardChoice)="votingCardChange($event)"
-  ></app-voting-card>
-</ul>
+  <div class="container my-5">
+    <div class="row align-items-start">
+      <!-- Results Section -->
+      <div class="col-md-4">
+        <div class="card shadow p-4 h-100">
+          <h5 class="card-title text-center mb-4">Vote Results</h5>
+          <ul class="list-group">
+            @for (voter of objectKeys(votes); track voter) {
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ voter }}:</span>
+                @if (reveal) {
+                  <span>{{ votes[voter] }}</span>
+                } @if (!reveal) {
+                  <span>
+                    <fa-icon [icon]="faCoffee"></fa-icon>
+                  </span>
+                }
+              </li>
+            }
+            @empty {
+              <li class="list-group-item">No Voters found.</li>
+            }
+          </ul>
+          <div class="mt-4 text-center">
+            <button class="btn btn-primary me-2" (click)="revealClicked()">Reveal Votes</button>
+            <button class="btn btn-danger" (click)="clearClicked()">Clear Votes</button>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Voting Card Section -->
+      <div class="col-md-8">
+        <app-voting-card
+          class="card shadow p-4 h-100"
+          [onCardChoiceChange]="cardChoice"
+          (userDetails)="(userDetails)"
+          (vote)="voted($event)"
+          (votingCardChoice)="votingCardChange($event)"
+        ></app-voting-card>
+      </div>
+    </div>
+  </div>
 }

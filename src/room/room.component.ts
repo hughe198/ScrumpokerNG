@@ -43,7 +43,7 @@ export class RoomComponent implements OnDestroy {
   constructor(private apiService: ApiService, private localstorage: LocalStorageService) {
     this.userDetails = localstorage.getUserDetails()
     this.cardChoice = this.userDetails?.votingCard ?? "fibonacci"
-
+    
   }
   ngOnDestroy(): void {
     this.reveal = !this.reveal
@@ -52,12 +52,20 @@ export class RoomComponent implements OnDestroy {
   }
   connectRoom() {
     const userDetails: IUserDetails | null = this.localstorage.getUserDetails()
+    console.log("Room local User Details:",this.userDetails)
     if (userDetails?.roomID) {
       this.apiService.connect(userDetails?.roomID)
-      const joinRoom: ISendVote = { voter: userDetails.voter, vote: ""}
+      const joinRoom: ISendVote = { voter: userDetails.voter, vote: ""} //initial vote send to update all users cards.
       this.apiService.sendVote(joinRoom)
-      const room = this.apiService.getVotes()
-      room.subscribe((data: IResults) => {
+      const apiVotesConnection = this.apiService.getVotes() //
+      if (this.userDetails?.votingCard){
+        this.cardChoice = userDetails.votingCard
+      }
+        else{
+          this.cardChoice = "fibonacci"
+        }
+      console.log("Room card choice",this.cardChoice)
+      apiVotesConnection.subscribe((data: IResults) => {
         this.results = data
         this.votes = data.votes
         this.reveal = data.reveal

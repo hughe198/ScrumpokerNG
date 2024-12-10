@@ -17,21 +17,17 @@ export class VotingCardComponent {
   @Output() vote = new EventEmitter<string>
   @Input() set onCardChoiceChange(choice: string) {
     if (choice) {
-      this.selectedOption = choice
-      console.log(choice)
-      const newCard = this.votingCard.find((x) => x.name === choice)
-      console.log(newCard?.selectedOptions())
+      const newCard = this.votingCard.find((x) => x.name.toLowerCase() === choice.toLowerCase())
       this.selectedOptions = newCard?.selectedOptions() ?? this.fibonacciCards.selectedOptions()
     }
     else {
-      this.selectedOption = "fibonacci"
       this.selectedOptions = this.fibonacciCards.selectedOptions()
     }
   }
 
   selectedOption: string
   constructor(private localService: LocalStorageService) {
-    this.selectedOption = "fibonacci"
+    this.selectedOption = "Fibonacci"
 
   }
   exponetialCards = voteExponential
@@ -47,6 +43,7 @@ export class VotingCardComponent {
     if (selectCard) {
       const newCard = this.votingCard.find((x) => x.name === selectCard)
       this.selectedOptions = newCard!.selectedOptions()
+      this.selectedOption = newCard!.name
       this.votingCardChoice.emit(this.selectedOption)
     }
   }
