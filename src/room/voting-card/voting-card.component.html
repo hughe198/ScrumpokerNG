@@ -1,43 +1,19 @@
-<div class="container my-5">
-  <div class="row justify-content-center">
-    <div class="col-md-12">
-      <div class="card shadow p-4 h-100">
-        <h5 class="card-title text-center mb-4">Voting Card</h5>
-        <div class="mb-3">
-          <label for="votingCardSelect" class="form-label">Select a Card</label>
-          <select
-            id="votingCardSelect"
-            [(ngModel)]="selectedOption"
-            (change)="onCardChange($event)"
-            class="form-select"
-          >
-            @for (card of votingCard; track card.name) {
-              <option (value)="card.name">{{ card.name }}</option>
-            }
-          </select>
-        </div>
+<div class="container mx-3">
+  Voting Card:
+  <select [(ngModel)]="selectedOption" (change)="onCardChange($event)" class="form-select">
+    @for(card of votingCard; track card.name){
+      <option (value)="card.name">{{card.name}}</option>
+    }
+  </select>
+  <div class="votingCard">
 
-        <div class="votingCard h-100">
-          <h6 class="mb-3">Options:</h6>
-          <div class="row h-100">
-            @for (option of selectedOptions; track option.icon) {
-              <div class="col-6 col-md-3">
-                <div
-                  class="votingOption p-3 text-center h-100 d-flex flex-column justify-content-center align-items-center"
-                  (click)="voteClicked(option.value)"
-                >
-                  <img
-                    [src]="option.icon"
-                    class="img-thumbnail square-img"
-                    alt="Option Icon"
-                  />
-                  <span class="d-block mt-2">{{ option.value }}</span>
-                </div>
-              </div>
-            }
-          </div>
-        </div>
-      </div>
+
+
+  @for (option of selectedOptions ; track option.icon) {
+    <div class="votingOption" (click)="voteClicked(option.value)">
+      <img [src]="option.icon" class = "img-thumbnail square-img"/>
+      <span>{{ option.value }}</span>
     </div>
-  </div>
+  }
+</div>
 </div>

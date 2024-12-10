@@ -28,11 +28,10 @@
           </div>
         </div>
       </div>
-  
+
       <!-- Voting Card Section -->
       <div class="col-md-8">
         <app-voting-card
-          class="card shadow p-4 h-100"
           [onCardChoiceChange]="cardChoice"
           (userDetails)="(userDetails)"
           (vote)="voted($event)"
