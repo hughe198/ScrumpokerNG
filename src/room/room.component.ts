@@ -107,7 +107,10 @@ export class RoomComponent implements OnDestroy {
   clearClicked(){
     const command:ICommand ={command:"Clear_votes"}
     this.apiService.sendCommand(command)
-
+    // const buttons = document.querySelectorAll(".votingOption")
+    // buttons.forEach(button =>{
+    //   button.classList.remove("voteSelected")
+    // })
   }
 
 

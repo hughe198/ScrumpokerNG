@@ -31,6 +31,12 @@ export class ApiService {
           console.error("error", data.error);
           break
         case "success":
+          if (data.success =="Votes Cleared"){
+            const buttons = document.querySelectorAll(".votingOption")
+            buttons.forEach(button =>{
+              button.classList.remove("voteSelected")
+            })
+          }
           console.log("success", data.success)
           break
         default:

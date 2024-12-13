@@ -15,6 +15,9 @@ export class VotingCardComponent {
 
   @Output() votingCardChoice = new EventEmitter<string>
   @Output() vote = new EventEmitter<string>
+  @Input() set clearSelected(clear:boolean){
+
+  }
   @Input() set onCardChoiceChange(choice: string) {
     if (choice) {
       const newCard = this.votingCard.find((x) => x.name.toLowerCase() === choice.toLowerCase())
@@ -49,9 +52,24 @@ export class VotingCardComponent {
   }
 
   voteClicked(voteValue: string) {
-    this.vote.emit(voteValue)
+
     console.log(`Voted:${voteValue}`)
+    this.toggleVoteButton(voteValue)
+    this.vote.emit(voteValue)
+    
+  }
+  
+  toggleVoteButton(voteValue:string){
+    const votebutton = document.querySelector(`#option-${voteValue}`) as HTMLElement
+    const buttons = document.querySelectorAll(".votingOption")
+    buttons?.forEach(option => {
+      if (option instanceof HTMLElement){
+        if(option.id != votebutton.id){
+          option.classList.remove("voteSelected")}
+        else{
+          option.classList.add("voteSelected")
+        }
+      }
+    });
   }
 }
-
-

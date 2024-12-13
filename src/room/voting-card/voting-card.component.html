@@ -7,10 +7,8 @@
   </select>
   <div class="votingCard">
 
-
-
   @for (option of selectedOptions ; track option.icon) {
-    <div class="votingOption" (click)="voteClicked(option.value)">
+    <div id="option-{{option.value}}" class="votingOption" (click)="voteClicked(option.value)">
       <img [src]="option.icon" class = "img-thumbnail square-img"/>
       <span>{{ option.value }}</span>
     </div>
