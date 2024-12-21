@@ -1,17 +1,22 @@
 
 import { ICommand } from './i-command';
 import { ISendVote } from './i-send-votes';
-
 import { IResults } from './i-results';
 import { IError } from './i-error';
 import { ISuccess } from './i-success';
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { ICardChange } from './i-card-change';
+import { ISettings } from './i-settings';
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
+  private settings = new BehaviorSubject<ISettings>({
+    type:"settings",
+    reveal:false,
+    votingCard:"fibonacci"
+  }) 
   private results = new Subject<IResults>
   socket?: WebSocket
   connect(roomID: string): void {
@@ -19,39 +24,53 @@ export class ApiService {
     this.socket.onopen = () => {
       console.log('Angular: Connected to websocket')
     }
-    type WebSocketMessage = IResults | IError | ISuccess;
+    type WebSocketMessage = IResults | IError | ISuccess | ISettings;
     this.socket.onmessage = (event) => {
       const data: WebSocketMessage = JSON.parse(event.data)
-      switch (data.type) {
-        case "result":
-          console.log(data)
-          this.results.next(data)
-          break
-        case "error":
-          console.error("error", data.error);
-          break
-        case "success":
-          if (data.success =="Votes Cleared"){
-            const buttons = document.querySelectorAll(".votingOption")
-            buttons.forEach(button =>{
-              button.classList.remove("voteSelected")
-            })
-          }
-          console.log("success", data.success)
-          break
-        default:
-          console.warn("Unknown message type:", data);
-          break;
+      try{
+        switch (data.type) {
+          case "result":
+            console.log(data)
+            this.results.next(data)
+            break
+          case "error":
+            console.error("error", data.error);
+            break
+          case "success":
+              this.handleSuccessMessage(data.success)
+              break
+          case "settings":
+            this.settings.next(data)
+            console.log("New Settings Broadcast", this.settings.getValue())
+            break
+          default:
+            console.warn("Unknown message type:", data);
+            break;
+        }
       }
-
-    }
-    this.socket.onclose = () => {
-      console.log('Angular:Websocket closed')
-    }
-    this.socket.onerror = (error) => {
-      console.error('Websocket Error', error)
+    catch (error){
+      this.socket!.onclose = () => {
+        console.log('Angular:Websocket closed')
+      }
+      this.socket!.onerror = (error) => {
+        console.error('Websocket Error', error)
+      }
     }
   }
+}
+
+  getSettings(){
+    return this.settings.asObservable()
+  }
+
+  sendSettingsChange(message:ISettings){
+    if (this.socket){
+      if(this.socket.readyState == WebSocket.OPEN){
+        this.socket.send(JSON.stringify(message))
+      }
+    }
+  }
+  
   sendVote(message: ISendVote) {
     if (this.socket) {
       if (this.socket.readyState === WebSocket.OPEN) {
@@ -85,8 +104,32 @@ export class ApiService {
         this.socket.send(JSON.stringify(card))
       } else {
         console.error("Websocket connection is not open")
-      }
+      } 
     }
   }
+
+  private handleSuccessMessage(successMessage:string):void{
+  switch (successMessage){
+    case "Votes Cleared":{
+        const buttons = document.querySelectorAll(".votingOption")
+        buttons.forEach(button =>{
+          button.classList.remove("voteSelected")
+        })
+        console.log("success", successMessage)
+        break}
+    case "Votes Revealed":{
+      const buttons = document.querySelector("#revealButton")
+      if (buttons?.innerHTML =="Reveal Votes"){
+        buttons.innerHTML = "Conceal Votes"
+      }else{
+        buttons!.innerHTML ="Reveal Votes"
+      }
+      break
+    }
+      default:
+    break 
+  }}
+
+
 
 }

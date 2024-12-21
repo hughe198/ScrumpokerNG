@@ -9,9 +9,9 @@
             @for (voter of objectKeys(votes); track voter) {
               <li class="list-group-item d-flex justify-content-between align-items-center">
                 <span>{{ voter }}:</span>
-                @if (reveal) {
+                @if (settings.reveal) {
                   <span>{{ votes[voter] }}</span>
-                } @if (!reveal) {
+                } @if (!settings.reveal) {
                   <span>
                     <fa-icon [icon]="faCoffee"></fa-icon>
                   </span>
@@ -23,7 +23,7 @@
             }
           </ul>
           <div class="mt-4 text-center">
-            <button class="btn btn-primary me-2" (click)="revealClicked()">Reveal Votes</button>
+            <button id="revealButton" class="btn btn-primary me-2" (click)="revealClicked()">Reveal Votes</button>
             <button class="btn btn-danger" (click)="clearClicked()">Clear Votes</button>
           </div>
         </div>
@@ -32,10 +32,8 @@
       <!-- Voting Card Section -->
       <div class="col-md-8">
         <app-voting-card
-          [onCardChoiceChange]="cardChoice"
           (userDetails)="(userDetails)"
           (vote)="voted($event)"
-          (votingCardChoice)="votingCardChange($event)"
         ></app-voting-card>
       </div>
     </div>

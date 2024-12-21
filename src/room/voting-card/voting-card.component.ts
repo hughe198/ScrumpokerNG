@@ -3,6 +3,10 @@ import { voteExponential, voteFibonacci, voteLinear, voteTshirts } from '../vote
 import { FormsModule } from '@angular/forms';
 import { IUserDetails } from '../../i-user-details';
 import { LocalStorageService } from '../../local-storage.service';
+import { ApiService } from '../../api.service';
+import { ISettings } from '../../i-settings';
+import { ICommand } from '../../i-command';
+import { ICardChange } from '../../i-card-change';
 
 @Component({
   selector: 'app-voting-card',
@@ -13,32 +17,25 @@ import { LocalStorageService } from '../../local-storage.service';
 })
 export class VotingCardComponent {
 
-  @Output() votingCardChoice = new EventEmitter<string>
   @Output() vote = new EventEmitter<string>
-  @Input() set clearSelected(clear:boolean){
-
-  }
-  @Input() set onCardChoiceChange(choice: string) {
-    if (choice) {
-      const newCard = this.votingCard.find((x) => x.name.toLowerCase() === choice.toLowerCase())
-      this.selectedOptions = newCard?.selectedOptions() ?? this.fibonacciCards.selectedOptions()
-    }
-    else {
-      this.selectedOptions = this.fibonacciCards.selectedOptions()
-    }
-  }
-
-  selectedOption: string
-  constructor(private localService: LocalStorageService) {
-    this.selectedOption = "Fibonacci"
-
-  }
-  exponetialCards = voteExponential
+  selectedOption?: string
+  settings!:ISettings  
   fibonacciCards = voteFibonacci
   linearCards = voteLinear
   tshirtsCards = voteTshirts
-  selectedOptions = this.fibonacciCards.selectedOptions()
+  exponetialCards = voteExponential
+  
   votingCard = [this.exponetialCards, this.fibonacciCards, this.linearCards, this.tshirtsCards]
+  selectedOptions = this.fibonacciCards.selectedOptions()
+  constructor(private localService: LocalStorageService, private api: ApiService) {
+    const settings = api.getSettings()
+    settings.subscribe((data)=>{
+      this.settings = data
+      this.selectedOption = this.settings.votingCard
+      const newCard = this.votingCard.find((x) => x.name === this.selectedOption)
+      this.selectedOptions = newCard!.selectedOptions()
+    })
+  }
   onCardChange(card: Event) {
     const selectElement = card.target as HTMLSelectElement
     const selectCard = selectElement.value
@@ -47,7 +44,8 @@ export class VotingCardComponent {
       const newCard = this.votingCard.find((x) => x.name === selectCard)
       this.selectedOptions = newCard!.selectedOptions()
       this.selectedOption = newCard!.name
-      this.votingCardChoice.emit(this.selectedOption)
+      const card:ICardChange ={Card_Change:this.selectedOption}
+      this.api.changeCards(card)
     }
   }
 

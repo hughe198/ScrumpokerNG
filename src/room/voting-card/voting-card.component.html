@@ -2,7 +2,7 @@
   Voting Card:
   <select [(ngModel)]="selectedOption" (change)="onCardChange($event)" class="form-select">
     @for(card of votingCard; track card.name){
-      <option (value)="card.name">{{card.name}}</option>
+      <option [value]="card.name">{{card.name}}</option>
     }
   </select>
   <div class="votingCard">
