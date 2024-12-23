@@ -152,7 +152,7 @@ export class ApiService {
       break
     }
     case "Exiting Room":{
-      console.log("Diconnect Acknoledgement recieved")
+      console.log("Disconnect Acknoledgement recieved")
       this.disconnect()
       break
     }
