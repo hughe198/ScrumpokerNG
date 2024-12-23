@@ -33,7 +33,9 @@ export class VotingCardComponent {
       this.settings = data
       this.selectedOption = this.settings.votingCard
       const newCard = this.votingCard.find((x) => x.name === this.selectedOption)
-      this.selectedOptions = newCard!.selectedOptions()
+      if (newCard){
+        this.selectedOptions = newCard!.selectedOptions()
+      }
     })
   }
   onCardChange(card: Event) {

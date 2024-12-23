@@ -52,10 +52,9 @@ export class RoomComponent implements OnDestroy {
   connectRoom() {
     const userDetails: IUserDetails | null = this.localstorage.getUserDetails()
     console.log("Room local User Details:",this.userDetails)
+    this.name = this.localstorage.getUserDetails()?.voter ?? ""
     if (userDetails?.roomID) {
-      this.apiService.connect(userDetails?.roomID)
-      const joinRoom: ISendVote = { voter: userDetails.voter, vote: ""} //initial vote send to update all users cards.
-      this.apiService.sendVote(joinRoom)
+      this.apiService.connect(userDetails?.roomID,this.name)
       const apiVotesConnection = this.apiService.getVotes() //
       apiVotesConnection.subscribe((data: IResults) => {
         this.results = data

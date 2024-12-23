@@ -5,6 +5,8 @@ import { IUserDetails } from '../i-user-details';
 import { FormsModule } from '@angular/forms';
 import validator from 'validator'
 import { RoomComponent } from "../room/room.component";
+import { ApiService } from '../api.service';
+import { ICommand } from '../i-command';
 @Component({
   selector: 'app-lobby',
   standalone: true,
@@ -14,17 +16,16 @@ import { RoomComponent } from "../room/room.component";
 })
 export class LobbyComponent implements OnInit {
 
-  constructor(private localStorageService: LocalStorageService) { }
+  constructor(private localStorageService: LocalStorageService, private api:ApiService) { }
 
-  voter: string | null = ""
+  voter: string = ""
   roomID: string | null = null
   votingCard: string | null = null
   localStorage: boolean = false
   active = false
   ngOnInit(): void {
     const local = this.localStorageService.getUserDetails()
-    console.log("Local Storage:",local)
-    
+    console.log("Local Storage:",local) 
     if (local !== null) {
       this.voter = local.voter
       this.roomID = local.roomID
@@ -32,16 +33,16 @@ export class LobbyComponent implements OnInit {
       this.localStorage = true
     } else {
       this.roomID = uuidv4();
-      this.votingCard="fibonacci"
+      this.votingCard="Fibonacci"
     }
     console.log("Voter: ",this.voter,"roomID ",this.roomID,"votingCard: ",this.votingCard,"Local Storage: ",this.localStorage )
   }
 
-  connect(name: string | null, roomID: string | null, votingCard : string | null) {
-    console.log(this.localStorage)
-    if (name && roomID && votingCard && validator.isUUID(roomID)) {
+  connect(voter: string, roomID: string | null, votingCard : string | null) {
+    console.log("Connecting with:",this.roomID, this.voter)
+    if (voter && roomID && votingCard && validator.isUUID(roomID)) {
       this.active = true
-      const details: IUserDetails = { voter: name, roomID: roomID, votingCard:votingCard}
+      const details: IUserDetails = { voter: voter, roomID: roomID, votingCard:votingCard}
       this.localStorageService.setUserDetails(details)
     }
     else {
@@ -49,12 +50,15 @@ export class LobbyComponent implements OnInit {
       this.roomID = uuidv4();
     }
   }
-  createNewRoom() {
+  async createNewRoom() {
+    this.api.requestDisconnect()
     this.roomID = uuidv4()
+    if (this.voter && this.roomID && this.votingCard && validator.isUUID(this.roomID)) {
+      this.active = false
+      const details: IUserDetails = { voter: this.voter, roomID: this.roomID, votingCard:this.votingCard}
+      this.localStorageService.setUserDetails(details)
   }
-
-
-
-
-
+  this.active = true
+  
+}
 }

@@ -18,13 +18,15 @@ export class ApiService {
     votingCard:"fibonacci"
   }) 
   private results = new Subject<IResults>
-  socket?: WebSocket
-  connect(roomID: string): void {
+  private socket: WebSocket | null = null;
+  connect(roomID: string, voter:string): void {
     this.socket = new WebSocket(`ws://127.0.0.1:8000/ws/${roomID}`)
     this.socket.onopen = () => {
       console.log('Angular: Connected to websocket')
+      this.socket?.send(voter)
     }
     type WebSocketMessage = IResults | IError | ISuccess | ISettings;
+    
     this.socket.onmessage = (event) => {
       const data: WebSocketMessage = JSON.parse(event.data)
       try{
@@ -49,16 +51,16 @@ export class ApiService {
         }
       }
     catch (error){
-      this.socket!.onclose = () => {
-        console.log('Angular:Websocket closed')
-      }
-      this.socket!.onerror = (error) => {
-        console.error('Websocket Error', error)
-      }
+        console.log(error)
     }
   }
+  this.socket!.onclose = () => {
+    console.log('Angular:Websocket closed')
+  }
+  this.socket!.onerror = (error) => {
+    console.error('Websocket Error', error)
+  }
 }
-
   getSettings(){
     return this.settings.asObservable()
   }
@@ -95,6 +97,29 @@ export class ApiService {
       }
     }
   }
+
+  requestDisconnect():void{
+    const command:ICommand ={command:"Exit_room"}
+    this.sendCommand(command)
+  }
+
+  disconnect(): void {
+    if (this.socket && this.socket.readyState !== WebSocket.CLOSED) {
+      this.socket.close();
+      this.socket = null;
+    }
+  
+    // Complete subjects and reset states
+    this.settings.complete();
+    this.results.complete();
+    this.settings = new BehaviorSubject<ISettings>({
+      type: "settings",
+      reveal: false,
+      votingCard: "fibonacci",
+    });
+    this.results = new Subject<IResults>();
+  }
+
   getVotes(): Observable<IResults> {
     return this.results.asObservable()
   }
@@ -107,7 +132,7 @@ export class ApiService {
       } 
     }
   }
-
+  
   private handleSuccessMessage(successMessage:string):void{
   switch (successMessage){
     case "Votes Cleared":{
@@ -124,6 +149,11 @@ export class ApiService {
       }else{
         buttons!.innerHTML ="Reveal Votes"
       }
+      break
+    }
+    case "Exiting Room":{
+      console.log("Diconnect Acknoledgement recieved")
+      this.disconnect()
       break
     }
       default:
