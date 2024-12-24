@@ -108,16 +108,28 @@ export class ApiService {
       this.socket.close();
       this.socket = null;
     }
-  
+    this.settings.next({
+      type: "settings",
+      reveal: false,
+      votingCard: "fibonacci",
+    });
+
+    this.results.next({
+      type: "result",
+      roomID: "", // Reset roomID
+      votingCard: "fibonacci", // Default or empty votingCard
+      votes: {}, // Empty votes object
+    });
     // Complete subjects and reset states
-    this.settings.complete();
-    this.results.complete();
+
     this.settings = new BehaviorSubject<ISettings>({
       type: "settings",
       reveal: false,
       votingCard: "fibonacci",
     });
     this.results = new Subject<IResults>();
+    this.settings.complete();
+    this.results.complete();
   }
 
   getVotes(): Observable<IResults> {

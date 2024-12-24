@@ -41,24 +41,31 @@ export class LobbyComponent implements OnInit {
   connect(voter: string, roomID: string | null, votingCard : string | null) {
     console.log("Connecting with:",this.roomID, this.voter)
     if (voter && roomID && votingCard && validator.isUUID(roomID)) {
-      this.active = true
+      this.api.connect(roomID,voter)
       const details: IUserDetails = { voter: voter, roomID: roomID, votingCard:votingCard}
       this.localStorageService.setUserDetails(details)
+      this.active = true
     }
     else {
       console.error('Invalid RoomID or Name  ', this.roomID)
       this.roomID = uuidv4();
+      this.active =false
     }
   }
-  async createNewRoom() {
-    this.api.requestDisconnect()
+  createNewRoom() {
     this.roomID = uuidv4()
     if (this.voter && this.roomID && this.votingCard && validator.isUUID(this.roomID)) {
       this.active = false
       const details: IUserDetails = { voter: this.voter, roomID: this.roomID, votingCard:this.votingCard}
       this.localStorageService.setUserDetails(details)
   }
-  this.active = true
-  
+    this.active = true
+    this.connect(this.voter,this.roomID,this.votingCard)
 }
+
+  disconnect(){
+    this.api.requestDisconnect()
+    this.active = false
+  }
+  
 }

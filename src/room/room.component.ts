@@ -33,6 +33,10 @@ export class RoomComponent implements OnDestroy {
       const userDetails: IUserDetails | null = this.localstorage.getUserDetails()
       this.name = userDetails!.voter
     }
+    else{
+      this.active = false
+      console.log("RoomComponent: Disconnected");
+    }
   }
   
   name: string = ""
@@ -54,7 +58,6 @@ export class RoomComponent implements OnDestroy {
     console.log("Room local User Details:",this.userDetails)
     this.name = this.localstorage.getUserDetails()?.voter ?? ""
     if (userDetails?.roomID) {
-      this.apiService.connect(userDetails?.roomID,this.name)
       const apiVotesConnection = this.apiService.getVotes() //
       apiVotesConnection.subscribe((data: IResults) => {
         this.results = data
