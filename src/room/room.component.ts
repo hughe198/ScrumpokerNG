@@ -12,6 +12,7 @@ import { ICommand } from '../i-command';
 import {FontAwesomeModule} from '@fortawesome/angular-fontawesome'
 import { faC, faCoffee } from '@fortawesome/free-solid-svg-icons';
 import { ISettings } from '../i-settings';
+import { Subject, takeUntil } from 'rxjs';
 @Component({
   selector: 'app-room',
   standalone: true,
@@ -25,6 +26,10 @@ export class RoomComponent implements OnDestroy {
 
   faCoffee = faCoffee
   active:boolean = false
+  
+  private destroy$ = new Subject<void>();
+  
+  
   @Input()
   set connection(active: boolean) {
     if (active) {
@@ -49,26 +54,48 @@ export class RoomComponent implements OnDestroy {
     this.userDetails = localstorage.getUserDetails()    
   }
   ngOnDestroy(): void {
-    const command:ICommand ={command:"Exit_room"}
-    this.apiService.sendCommand(command)
+    this.disconnectRoom();
+    console.log('RoomComponent Destroyed');
   }
   
-  connectRoom() {
-    const userDetails: IUserDetails | null = this.localstorage.getUserDetails()
-    console.log("Room local User Details:",this.userDetails)
-    this.name = this.localstorage.getUserDetails()?.voter ?? ""
-    if (userDetails?.roomID) {
-      const apiVotesConnection = this.apiService.getVotes() //
-      apiVotesConnection.subscribe((data: IResults) => {
-        this.results = data
-        this.votes = data.votes
-      })
-      const apiSettings = this.apiService.getSettings()
-      apiSettings.subscribe((data:ISettings)=>{
-        this.settings = data
-      })
-    }
+  disconnectRoom(){
+    const command:ICommand = {command:"Exit_room"}
+    this.apiService.sendCommand(command)
+    this.destroy$.next();
+    this.destroy$.complete()
+    this.destroy$ = new Subject<void>()
+    console.log('RoomComponent Destroyed');
+    
+
   }
+
+
+  connectRoom() {
+  const apiVotesConnection = this.apiService.getVotes()
+  .pipe(takeUntil(this.destroy$));
+
+  apiVotesConnection.subscribe({
+    next: (data: IResults) => {
+        this.results = data;
+        this.votes = data.votes;
+    },
+    complete: () => {
+        console.log('Votes subscription completed');
+        this.active = false; // Update UI state accordingly
+  }
+});
+
+const apiSettings = this.apiService.getSettings()
+  .pipe(takeUntil(this.destroy$));
+
+apiSettings.subscribe({
+  next: (data: ISettings) => {
+      this.settings = data;
+  },
+  complete: () => {
+      console.log('Settings subscription completed');
+  }})
+};
 
   objectKeys(obj: IVotes): string[] {
     if (obj){

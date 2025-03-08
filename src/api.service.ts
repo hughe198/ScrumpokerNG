@@ -17,7 +17,7 @@ export class ApiService {
     reveal:false,
     votingCard:"fibonacci"
   }) 
-  private results = new Subject<IResults>
+  private results = new Subject<IResults>()
   private socket: WebSocket | null = null;
   connect(roomID: string, voter:string): void {
     this.socket = new WebSocket(`ws://127.0.0.1:8000/ws/${roomID}`)
@@ -121,15 +121,15 @@ export class ApiService {
       votes: {}, // Empty votes object
     });
     // Complete subjects and reset states
-
+    this.settings.complete();
+    this.results.complete();
     this.settings = new BehaviorSubject<ISettings>({
       type: "settings",
       reveal: false,
       votingCard: "fibonacci",
-    });
-    this.results = new Subject<IResults>();
-    this.settings.complete();
-    this.results.complete();
+  });
+
+  this.results = new Subject<IResults>();
   }
 
   getVotes(): Observable<IResults> {
