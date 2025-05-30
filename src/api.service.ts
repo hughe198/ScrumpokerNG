@@ -8,6 +8,9 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { ICardChange } from './i-card-change';
 import { ISettings } from './i-settings';
+import { environment } from './environments/environment';
+import {IName} from './i-name'
+import { stringify } from 'uuid';
 @Injectable({
   providedIn: 'root'
 })
@@ -19,16 +22,28 @@ export class ApiService {
   }) 
   private results = new Subject<IResults>()
   private socket: WebSocket | null = null;
-  connect(roomID: string, voter:string): void {
-    this.socket = new WebSocket(`ws://127.0.0.1:8000/ws/${roomID}`)
+  private protocol:String = environment.wsssecure ? "wss" : "ws";
+  
+  private duplicateNameSubject = new Subject<boolean>()
+
+  getDuplicateNameObservable():Observable<boolean>{
+    return this.duplicateNameSubject.asObservable();
+  }
+
+
+
+  connect(roomID: string, voter:string) {
+    const voterName:IName ={name:voter}
+    this.socket = new WebSocket(`${this.protocol}://${environment.websocketBase}/ws/${roomID}`)
     this.socket.onopen = () => {
       console.log('Angular: Connected to websocket')
-      this.socket?.send(voter)
+      this.socket?.send(JSON.stringify(voterName))
     }
     type WebSocketMessage = IResults | IError | ISuccess | ISettings;
     
     this.socket.onmessage = (event) => {
-      const data: WebSocketMessage = JSON.parse(event.data)
+      const data: WebSocketMessage = JSON.parse(event.data);
+     
       try{
         switch (data.type) {
           case "result":
@@ -54,13 +69,15 @@ export class ApiService {
         console.log(error)
     }
   }
-  this.socket!.onclose = () => {
-    console.log('Angular:Websocket closed')
-  }
-  this.socket!.onerror = (error) => {
-    console.error('Websocket Error', error)
+  this.socket!.onclose = (event) => {
+    if (event.code === 4000) {
+    this.duplicateNameSubject.next(true);
+    console.log(true)
+    }
+    
   }
 }
+
   getSettings(){
     return this.settings.asObservable()
   }
@@ -120,7 +137,7 @@ export class ApiService {
       votingCard: "fibonacci", // Default or empty votingCard
       votes: {}, // Empty votes object
     });
-    // Complete subjects and reset states
+    // Complete subjects and resets states
     this.settings.complete();
     this.results.complete();
     this.settings = new BehaviorSubject<ISettings>({
@@ -128,7 +145,6 @@ export class ApiService {
       reveal: false,
       votingCard: "fibonacci",
   });
-
   this.results = new Subject<IResults>();
   }
 

@@ -24,9 +24,25 @@ export class LobbyComponent implements OnInit {
   localStorage: boolean = false
   active = false
   ngOnInit(): void {
+    this.api.getDuplicateNameObservable().subscribe((isDuplicate)=>{
+      if (isDuplicate){
+        this.active = false
+        console.warn("Duplicate name detected")
+      }
+    })
+
     const local = this.localStorageService.getUserDetails()
     console.log("Local Storage:",local) 
-    if (local !== null) {
+    if (
+          local &&
+          typeof local.voter === 'string' &&
+          local.voter.trim() !== '' &&
+          typeof local.roomID === 'string' &&
+          validator.isUUID(local.roomID) &&
+          typeof local.votingCard === 'string' &&
+          local.votingCard.trim() !== ''
+        )
+        {
       this.voter = local.voter
       this.roomID = local.roomID
       this.votingCard = local.votingCard
@@ -38,18 +54,22 @@ export class LobbyComponent implements OnInit {
     console.log("Voter: ",this.voter,"roomID ",this.roomID,"votingCard: ",this.votingCard,"Local Storage: ",this.localStorage )
   }
 
+
+
+
+
   connect(voter: string, roomID: string | null, votingCard : string | null) {
     console.log("Connecting with:",this.roomID, this.voter)
     if (voter && roomID && votingCard && validator.isUUID(roomID)) {
       this.api.connect(roomID,voter)
-      const details: IUserDetails = { voter: voter, roomID: roomID, votingCard:votingCard}
+      this.voter = ""
+      var details: IUserDetails = { voter: voter, roomID: roomID, votingCard:votingCard}
       this.localStorageService.setUserDetails(details)
       this.active = true
-    }
-    else {
+    } else {
       console.error('Invalid RoomID or Name  ', this.roomID)
       this.roomID = uuidv4();
-      this.active =false
+      this.active = false
     }
   }
   createNewRoom() {
@@ -58,9 +78,8 @@ export class LobbyComponent implements OnInit {
       this.active = false
       const details: IUserDetails = { voter: this.voter, roomID: this.roomID, votingCard:this.votingCard}
       this.localStorageService.setUserDetails(details)
+      console.log(details)
   }
-    this.active = true
-    this.connect(this.voter,this.roomID,this.votingCard)
 }
 
   disconnect(){
