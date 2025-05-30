@@ -19,6 +19,11 @@
                 [(ngModel)]="voter"
                 placeholder="Enter Name"
               />
+              @if (duplicateNameError) {
+                     <div class="form-text border">
+                       That name is already taken.
+                     </div>
+                   }
             </div>
             <div class="mb-3">
               <input

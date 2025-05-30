@@ -23,12 +23,17 @@ export class LobbyComponent implements OnInit {
   votingCard: string | null = null
   localStorage: boolean = false
   active = false
+  duplicateNameError = false;
   ngOnInit(): void {
     this.api.getDuplicateNameObservable().subscribe((isDuplicate)=>{
       if (isDuplicate){
         this.active = false
-        console.warn("Duplicate name detected")
+        this.duplicateNameError = true;
+        this.voter = ""
       }
+            setTimeout(() => {
+        this.duplicateNameError = false;
+      }, 2000);
     })
 
     const local = this.localStorageService.getUserDetails()
@@ -62,7 +67,6 @@ export class LobbyComponent implements OnInit {
     console.log("Connecting with:",this.roomID, this.voter)
     if (voter && roomID && votingCard && validator.isUUID(roomID)) {
       this.api.connect(roomID,voter)
-      this.voter = ""
       var details: IUserDetails = { voter: voter, roomID: roomID, votingCard:votingCard}
       this.localStorageService.setUserDetails(details)
       this.active = true
