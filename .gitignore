@@ -37,7 +37,7 @@ yarn-error.log
 /libpeerconnection.log
 testem.log
 /typings
-
+tasks.txt
 # System files
 .DS_Store
 Thumbs.db
@@ -138,3 +138,5 @@ Thumbs.db
 # src/assets/icons/t-shirts/15.png
 # src/assets/icons/t-shirts/16.png
 # src/assets/icons/t-shirts/origianl.webp
+.gitignore
+.gitignore
