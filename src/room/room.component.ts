@@ -56,6 +56,7 @@ export class RoomComponent implements OnDestroy {
   voteString: string = ""
   userDetails: IUserDetails | null
   clearVotes = new Subject<void>()
+  reveal:Boolean = false;
   constructor(private cdr:ChangeDetectorRef, private apiService: ApiService, private localstorage: LocalStorageService) {
     this.userDetails = localstorage.getUserDetails()    
   }
@@ -106,6 +107,8 @@ const apiSettings = this.apiService.getSettings()
 apiSettings.subscribe({
   next: (data: ISettings) => {
       this.settings = data;
+      this.reveal = this.settings.reveal
+
   },
   complete: () => {
       console.log('Settings subscription completed');
