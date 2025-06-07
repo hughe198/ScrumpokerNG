@@ -10,9 +10,12 @@ import { VotingCardComponent } from "./voting-card/voting-card.component";
 import { ICardChange } from '../i-card-change';
 import { ICommand } from '../i-command';
 import {FontAwesomeModule} from '@fortawesome/angular-fontawesome'
-import { faC, faCoffee } from '@fortawesome/free-solid-svg-icons';
+import { faCoffee } from '@fortawesome/free-solid-svg-icons';
+import { faCheckSquare } from '@fortawesome/free-solid-svg-icons';
+import { faSquare } from '@fortawesome/free-solid-svg-icons';
+
 import { ISettings } from '../i-settings';
-import { Subject, takeUntil } from 'rxjs';
+import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
 @Component({
   selector: 'app-room',
   standalone: true,
@@ -25,6 +28,8 @@ import { Subject, takeUntil } from 'rxjs';
 export class RoomComponent implements OnDestroy {
 
   faCoffee = faCoffee
+  faCheckSquare = faCheckSquare
+  faSquare = faSquare
   active:boolean = false
   
   private destroy$ = new Subject<void>();
@@ -50,6 +55,7 @@ export class RoomComponent implements OnDestroy {
   settings!:ISettings
   voteString: string = ""
   userDetails: IUserDetails | null
+  clearVotes = new Subject<void>()
   constructor(private cdr:ChangeDetectorRef, private apiService: ApiService, private localstorage: LocalStorageService) {
     this.userDetails = localstorage.getUserDetails()    
   }
@@ -78,9 +84,18 @@ export class RoomComponent implements OnDestroy {
     next: (data: IResults) => {
         this.results = data;
         this.votes = data.votes;
+        var cleared:boolean = true;
+        Object.values(this.votes).forEach(vote =>{
+          if (vote != ""){
+            cleared =false
+          }
+        })
+        if (cleared){
+          this.clearVotes.next()
+        }
+        
     },
     complete: () => {
-        console.log('Votes subscription completed');
         this.active = false; // Update UI state accordingly
   }
 });
@@ -127,8 +142,8 @@ apiSettings.subscribe({
   clearClicked(){
     const command:ICommand ={command:"Clear_votes"}
     this.apiService.sendCommand(command)
+    this.clearVotes.next();
   }
-
 
 
 }

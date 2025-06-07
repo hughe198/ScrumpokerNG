@@ -1,5 +1,21 @@
 
 import { IVoteType } from "./i-vote-type"
+export const voteStandard:IVoteType=
+{
+  name:"Standard",
+  identifier:"standard",
+  selectedOptions: ()=>[
+    {value:"1",icon:"assets/icons/fibonacci/1.png"},
+    {value:"2",icon:"assets/icons/fibonacci/2.png"},
+    {value:"3",icon:"assets/icons/fibonacci/3.png"},
+    {value:"5",icon:"assets/icons/fibonacci/4.png"},
+    {value:"8",icon:"assets/icons/fibonacci/5.png"},
+    {value:"13",icon:"assets/icons/fibonacci/6.png"},
+    {value:"20",icon:"assets/icons/fibonacci/7.png"},
+    {value:"40",icon:"assets/icons/fibonacci/8.png"},
+    {value:"100",icon:"assets/icons/fibonacci/9.png"}
+  ],
+  }
 export const voteFibonacci:IVoteType=
 {
   name:"Fibonacci",
@@ -13,7 +29,7 @@ export const voteFibonacci:IVoteType=
     {value:"13",icon:"assets/icons/fibonacci/6.png"},
     {value:"21",icon:"assets/icons/fibonacci/7.png"},
     {value:"34",icon:"assets/icons/fibonacci/8.png"},
-    {value:"55",icon:"assets/icons/fibonacci/9.png"}
+    {value:"100",icon:"assets/icons/fibonacci/9.png"}
   ],
   }
 

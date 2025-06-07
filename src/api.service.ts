@@ -47,7 +47,6 @@ export class ApiService {
       try{
         switch (data.type) {
           case "result":
-            console.log(data)
             this.results.next(data)
             break
           case "error":
@@ -58,7 +57,6 @@ export class ApiService {
               break
           case "settings":
             this.settings.next(data)
-            console.log("New Settings Broadcast", this.settings.getValue())
             break
           default:
             console.warn("Unknown message type:", data);
@@ -180,7 +178,7 @@ export class ApiService {
       break
     }
     case "Exiting Room":{
-      console.log("Disconnect Acknoledgement recieved")
+      console.log("Disconnect Acknowledgement received")
       this.disconnect()
       break
     }

@@ -29,4 +29,10 @@ export class LocalStorageService {
     return null
 
   }
+
+  changeVotingCard(change:string){
+    localStorage.setItem('votingCard',change)  
+  }
+
+
 }

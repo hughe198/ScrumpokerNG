@@ -37,7 +37,6 @@ export class LobbyComponent implements OnInit {
     })
 
     const local = this.localStorageService.getUserDetails()
-    console.log("Local Storage:",local) 
     if (
           local &&
           typeof local.voter === 'string' &&
@@ -56,7 +55,7 @@ export class LobbyComponent implements OnInit {
       this.roomID = uuidv4();
       this.votingCard="Fibonacci"
     }
-    console.log("Voter: ",this.voter,"roomID ",this.roomID,"votingCard: ",this.votingCard,"Local Storage: ",this.localStorage )
+    // console.log("Voter: ",this.voter,"roomID ",this.roomID,"votingCard: ",this.votingCard,"Local Storage: ",this.localStorage )
   }
 
 
@@ -71,7 +70,6 @@ export class LobbyComponent implements OnInit {
       this.localStorageService.setUserDetails(details)
       this.active = true
     } else {
-      console.error('Invalid RoomID or Name  ', this.roomID)
       this.roomID = uuidv4();
       this.active = false
     }
@@ -82,7 +80,6 @@ export class LobbyComponent implements OnInit {
       this.active = false
       const details: IUserDetails = { voter: this.voter, roomID: this.roomID, votingCard:this.votingCard}
       this.localStorageService.setUserDetails(details)
-      console.log(details)
   }
 }
 

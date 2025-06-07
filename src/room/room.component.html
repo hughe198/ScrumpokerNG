@@ -11,10 +11,16 @@
                 <span>{{ voter }}:</span>
                 @if (settings.reveal) {
                   <span>{{ votes[voter] }}</span>
-                } @if (!settings.reveal) {
-                  <span>
-                    <fa-icon [icon]="faCoffee"></fa-icon>
-                  </span>
+                } 
+                @else {
+                  @if(votes[voter] ==""){
+                    <fa-icon [icon]='faSquare'></fa-icon>
+                  }
+                  @else{
+                    <span>
+                      <fa-icon [icon]='faCheckSquare'></fa-icon>
+                    </span>
+                  }                 
                 }
               </li>
             }
@@ -34,6 +40,7 @@
         <app-voting-card
           (userDetails)="(userDetails)"
           (vote)="voted($event)"
+          [clearVotes]="clearVotes"
         ></app-voting-card>
       </div>
     </div>
