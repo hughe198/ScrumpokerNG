@@ -16,10 +16,11 @@ import { faSquare } from '@fortawesome/free-solid-svg-icons';
 
 import { ISettings } from '../i-settings';
 import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
+import { BarchartComponent } from './barchart/barchart.component';
 @Component({
   selector: 'app-room',
   standalone: true,
-  imports: [FormsModule, VotingCardComponent,FontAwesomeModule],
+  imports: [FormsModule, VotingCardComponent,FontAwesomeModule,BarchartComponent],
   templateUrl: './room.component.html',
   styleUrl: './room.component.css'
 })
@@ -57,6 +58,7 @@ export class RoomComponent implements OnDestroy {
   userDetails: IUserDetails | null
   clearVotes = new Subject<void>()
   reveal:Boolean = false;
+  sortedVotes!:IVotes;
   constructor(private cdr:ChangeDetectorRef, private apiService: ApiService, private localstorage: LocalStorageService) {
     this.userDetails = localstorage.getUserDetails()    
   }
@@ -86,6 +88,8 @@ export class RoomComponent implements OnDestroy {
         this.results = data;
         this.votes = data.votes;
         var cleared:boolean = true;
+        this.sortedVotes = this.sortVotes(data.votes)
+
         Object.values(this.votes).forEach(vote =>{
           if (vote != ""){
             cleared =false
@@ -140,13 +144,38 @@ apiSettings.subscribe({
     const revealButton = document.querySelector("#revealButton")
     const command:ICommand ={command:"Reveal_votes"}
     this.apiService.sendCommand(command)
+    this.sortedVotes = this.sortVotes(this.votes)
+    console.log(JSON.stringify(this.sortedVotes))
   }
 
   clearClicked(){
     const command:ICommand ={command:"Clear_votes"}
     this.apiService.sendCommand(command)
     this.clearVotes.next();
+    this.revealClicked()
+    
   }
+
+sortVotes(data:IVotes):IVotes {
+  // Is the voting data numeric, or text based- i.e number or t-shirt sizes
+  const isDataNumeric = (val:string)=> !isNaN(Number(val)) && val.trim() !== ""
+  
+  var sortedData = Object.entries(data).sort(([,voteA],[,voteB])=>{
+    const aIsNum = isDataNumeric(voteA)
+    const bIsNum = isDataNumeric(voteB)
+
+    if (aIsNum && bIsNum) return Number(voteA) - Number(voteB); // returns a value +ve means A before B and vice versa
+    if (!aIsNum && !bIsNum) return voteA.length - voteB.length
+    return aIsNum ? -1 : 1 //if it reaches here, one is a string, one a num, it sorts numbers hgher
+  })
+
+// change array back into object and return
+return sortedData.reduce<IVotes>((acc, [key, val]) => {
+  acc[key] = val;
+  return acc;
+}, {});
+}
+
 
 
 }

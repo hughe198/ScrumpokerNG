@@ -5,14 +5,11 @@
       <div class="col-md-4">
         <div class="card shadow p-4 h-100">
           <h5 class="card-title text-center mb-4">Vote Results</h5>
-          <ul class="list-group">
-            @for (voter of objectKeys(votes); track voter) {
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span>{{ voter }}:</span>
-                @if (settings.reveal) {
-                  <span>{{ votes[voter] }}</span>
-                } 
-                @else {
+          @if (!settings.reveal) {
+            <ul class="list-group">
+          @for (voter of objectKeys(votes); track voter) {
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>{{ voter }}:</span>
                   @if(votes[voter] ==""){
                     <fa-icon [icon]='faSquare'></fa-icon>
                   }
@@ -21,13 +18,26 @@
                       <fa-icon [icon]='faCheckSquare'></fa-icon>
                     </span>
                   }                 
-                }
+                </li>
+              }
+              @empty {
+                <li class="list-group-item">No Voters found.</li>
+              }
+            </ul>
+            }
+            @if (settings.reveal){
+              <ul class="list-group">
+              @for(voter of objectKeys(sortedVotes); track voter){
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{voter}}</span>
+                <span>{{ votes[voter] }}</span>
               </li>
+              }
+            </ul>
             }
-            @empty {
-              <li class="list-group-item">No Voters found.</li>
-            }
-          </ul>
+
+
+        
           <div class="mt-4 text-center">
             <button id="revealButton" class="btn btn-primary me-2" (click)="revealClicked()">{{reveal ? "Hide":"Reveal"}}</button>
             <button class="btn btn-danger" (click)="clearClicked()">Clear Votes</button>
@@ -45,4 +55,6 @@
       </div>
     </div>
   </div>
+
+  <app-barchart></app-barchart>
 }
