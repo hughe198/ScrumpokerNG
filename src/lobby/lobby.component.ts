@@ -7,16 +7,17 @@ import validator from 'validator'
 import { RoomComponent } from "../room/room.component";
 import { ApiService } from '../api.service';
 import { ICommand } from '../i-command';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-lobby',
   standalone: true,
-  imports: [FormsModule, RoomComponent],
+  imports: [FormsModule],
   templateUrl: './lobby.component.html',
   styleUrl: './lobby.component.css'
 })
 export class LobbyComponent implements OnInit {
 
-  constructor(private localStorageService: LocalStorageService, private api:ApiService) { }
+  constructor(private localStorageService: LocalStorageService, private api:ApiService, private router:Router ) { }
 
   voter: string = ""
   roomID: string | null = null
@@ -65,19 +66,17 @@ export class LobbyComponent implements OnInit {
   connect(voter: string, roomID: string | null, votingCard : string | null) {
     console.log("Connecting with:",this.roomID, this.voter)
     if (voter && roomID && votingCard && validator.isUUID(roomID)) {
-      this.api.connect(roomID,voter)
       var details: IUserDetails = { voter: voter, roomID: roomID, votingCard:votingCard}
       this.localStorageService.setUserDetails(details)
-      this.active = true
+      this.router.navigate(['/room',roomID])
     } else {
       this.roomID = uuidv4();
-      this.active = false
+
     }
   }
   createNewRoom() {
     this.roomID = uuidv4()
     if (this.voter && this.roomID && this.votingCard && validator.isUUID(this.roomID)) {
-      this.active = false
       const details: IUserDetails = { voter: this.voter, roomID: this.roomID, votingCard:this.votingCard}
       this.localStorageService.setUserDetails(details)
   }
@@ -85,7 +84,6 @@ export class LobbyComponent implements OnInit {
 
   disconnect(){
     this.api.requestDisconnect()
-    this.active = false
   }
   
 }

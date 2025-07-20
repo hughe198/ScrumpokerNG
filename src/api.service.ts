@@ -51,6 +51,9 @@ export class ApiService {
             break
           case "error":
             console.error("error", data.error);
+            if (data.error ==="New Name Needed"){
+              this.duplicateNameSubject.next(true)
+            }
             break
           case "success":
               this.handleSuccessMessage(data.success)

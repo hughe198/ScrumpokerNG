@@ -4,7 +4,7 @@ import { LocalStorageService } from '../local-storage.service';
 import { IUserDetails } from '../i-user-details';
 import { IResults, IVotes } from '../i-results';
 import { ISendVote as ISendVote } from '../i-send-votes';
-import { ChangeDetectorRef, Component, Input, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { VotingCardComponent } from "./voting-card/voting-card.component";
 import { ICardChange } from '../i-card-change';
@@ -15,18 +15,21 @@ import { faCheckSquare } from '@fortawesome/free-solid-svg-icons';
 import { faSquare } from '@fortawesome/free-solid-svg-icons';
 
 import { ISettings } from '../i-settings';
-import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
-import { BarchartComponent } from './barchart/barchart.component';
+import {  Subject, take, takeUntil } from 'rxjs';
+import { ActivatedRoute, Route, Router } from '@angular/router';
+import { LobbyComponent } from '../lobby/lobby.component';
 @Component({
   selector: 'app-room',
   standalone: true,
-  imports: [FormsModule, VotingCardComponent,FontAwesomeModule,BarchartComponent],
+  imports: [FormsModule, VotingCardComponent,FontAwesomeModule],
   templateUrl: './room.component.html',
   styleUrl: './room.component.css'
 })
 
 
-export class RoomComponent implements OnDestroy {
+export class RoomComponent implements OnDestroy, OnInit {
+
+
 
   faCoffee = faCoffee
   faCheckSquare = faCheckSquare
@@ -36,21 +39,21 @@ export class RoomComponent implements OnDestroy {
   private destroy$ = new Subject<void>();
   
   
-  @Input()
-  set connection(active: boolean) {
-    if (active) {
-      this.active = active
-      this.connectRoom()
-      const userDetails: IUserDetails | null = this.localstorage.getUserDetails()
-      this.name = userDetails!.voter
-    }
-    else{
-      this.active = false
-      console.log("RoomComponent: Disconnected");
-    }
-  }
+  // @Input()
+  // set connection(active: boolean) {
+  //   if (active) {
+  //     this.active = active
+  //     this.connectRoom()
+  //     const userDetails: IUserDetails | null = this.localstorage.getUserDetails()
+  //     this.name = userDetails!.voter
+  //   }
+  //   else{
+  //     this.active = false
+  //     console.log("RoomComponent: Disconnected");
+  //   }
+  // }
   
-  name: string = ""
+  voter: string = ""
   votes!: IVotes
   results!: IResults
   settings!:ISettings
@@ -59,8 +62,40 @@ export class RoomComponent implements OnDestroy {
   clearVotes = new Subject<void>()
   reveal:Boolean = false;
   sortedVotes!:IVotes;
-  constructor(private cdr:ChangeDetectorRef, private apiService: ApiService, private localstorage: LocalStorageService) {
+  roomId!:string | null;
+  showVoterModal = false;
+  constructor(private cdr:ChangeDetectorRef, private api: ApiService, private localstorage: LocalStorageService, private route:ActivatedRoute, private router:Router) {
     this.userDetails = localstorage.getUserDetails()    
+  }
+  ngOnInit(): void {
+    this.route.paramMap.subscribe(params => {
+      this.roomId = params.get('roomId')
+      console.log(this.roomId)
+      const userDetails = this.localstorage.getUserDetails();
+    if (this.roomId && userDetails?.voter){
+      if (userDetails.voter){
+        this.voter = this.userDetails?.voter ?? ""
+      }
+      this.api.connect(this.roomId,userDetails.voter)
+      this.connectRoom()
+    }
+    })
+
+    this.api.getDuplicateNameObservable().pipe(take(1)).subscribe(isDuplicate =>{
+        if(isDuplicate){
+          this.showVoterModal = true
+          return
+        }
+      })
+
+
+
+
+
+
+
+
+
   }
   ngOnDestroy(): void {
     this.disconnectRoom();
@@ -69,25 +104,27 @@ export class RoomComponent implements OnDestroy {
   
   disconnectRoom(){
     const command:ICommand = {command:"Exit_room"}
-    this.apiService.sendCommand(command)
+    this.api.sendCommand(command)
     this.destroy$.next();
     this.destroy$.complete()
     this.destroy$ = new Subject<void>()
     console.log('RoomComponent Destroyed');
+    this.router.navigate(['/'])
     
 
   }
 
 
   connectRoom() {
-  const apiVotesConnection = this.apiService.getVotes()
+  const apiVotesConnection = this.api.getVotes()
   .pipe(takeUntil(this.destroy$));
 
   apiVotesConnection.subscribe({
     next: (data: IResults) => {
         this.results = data;
         this.votes = data.votes;
-        var cleared:boolean = true;
+        var cleared:boolean = true
+        console.log(this.results)
         this.sortedVotes = this.sortVotes(data.votes)
 
         Object.values(this.votes).forEach(vote =>{
@@ -105,7 +142,7 @@ export class RoomComponent implements OnDestroy {
   }
 });
 
-const apiSettings = this.apiService.getSettings()
+const apiSettings = this.api.getSettings()
   .pipe(takeUntil(this.destroy$));
 
 apiSettings.subscribe({
@@ -127,8 +164,8 @@ apiSettings.subscribe({
 
   voted(value: string) {
     this.voteString = value
-    const vote: ISendVote = { voter: this.name, vote: value}
-    this.apiService.sendVote(vote)
+    const vote: ISendVote = { voter: this.voter, vote: value}
+    this.api.sendVote(vote)
   }
   votingCardChange(card: string) {
     const userDetails = this.localstorage.getUserDetails()
@@ -137,20 +174,20 @@ apiSettings.subscribe({
       this.localstorage.setUserDetails(userDetails)
     }
     const cardChange:ICardChange = {Card_Change:card}
-    this.apiService.changeCards(cardChange)
+    this.api.changeCards(cardChange)
   }
 
   revealClicked( ){
     const revealButton = document.querySelector("#revealButton")
     const command:ICommand ={command:"Reveal_votes"}
-    this.apiService.sendCommand(command)
+    this.api.sendCommand(command)
     this.sortedVotes = this.sortVotes(this.votes)
     console.log(JSON.stringify(this.sortedVotes))
   }
 
   clearClicked(){
     const command:ICommand ={command:"Clear_votes"}
-    this.apiService.sendCommand(command)
+    this.api.sendCommand(command)
     this.clearVotes.next();
     this.revealClicked()
     
@@ -176,6 +213,29 @@ return sortedData.reduce<IVotes>((acc, [key, val]) => {
 }, {});
 }
 
+submitName():void{
+  this.showVoterModal = false
+  const trimmedName = this.voter.trim()
+  if (this.roomId && trimmedName){
+  this.api.connect(this.roomId, trimmedName);
+  this.localstorage.setUserDetails({
+    voter:trimmedName,
+    roomID:this.roomId,
+    votingCard:'Standard'
+  })
+  }
+  else{
+    console.log("Error rejoining room")
+  }
+
+
+  
+}
+
+exitRoom(){
+  this.api.disconnect()
+  this.router.navigate([''])
+}
 
 
 }
