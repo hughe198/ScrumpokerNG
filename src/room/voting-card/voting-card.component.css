@@ -1,6 +1,6 @@
 .square-img {
-    width: 100px;
-    height: 100px;
+    width: 240px;
+    height: 140px;
     object-fit: cover; 
   }
 
@@ -34,4 +34,9 @@
 
 .votingOption:active {
   transform: scale(0.95);
+}
+
+.voting-card-text{
+  color: rgb(0, 0, 0);
+  font-size: 30px;
 }

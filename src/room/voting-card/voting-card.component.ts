@@ -31,7 +31,7 @@ export class VotingCardComponent implements OnInit {
   
   votingCard = [this.standardVote,this.fibonacciCards,this.exponetialCards, this.linearCards, this.tshirtsCards]
   selectedOptions = this.standardVote.selectedOptions()
-
+  
   constructor(private localService: LocalStorageService, private api: ApiService) {
     const settings = api.getSettings()
     settings.subscribe((data)=>{
@@ -42,12 +42,12 @@ export class VotingCardComponent implements OnInit {
         this.selectedOptions = newCard!.selectedOptions()
       }
     })
-
   }
   ngOnInit(): void {
     this.clearVotes.subscribe(()=>{
       this.resetVoteCard()
     })
+    
   }
   onCardChange(card: Event) {
     const selectElement = card.target as HTMLSelectElement

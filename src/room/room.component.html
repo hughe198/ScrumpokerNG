@@ -1,86 +1,91 @@
-<div class="container my-5">
 
-  <!-- Voter Modal -->
-  @if (showVoterModal) {
-    <div class="modal-overlay">
-      <div class="modal-content">
-        <h3>Enter your name</h3>
-        <input [(ngModel)]="voter" placeholder="Your name" />
-        <button (click)="submitName()">Join Room</button>
+
+  <div class="main-container" >
+  
+    <!-- Voter Modal -->
+    @if (showVoterModal) {
+      <div class="modal-overlay position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex justify-content-center align-items-center z-3">
+        <div class="modal-content bg-white p-4 rounded shadow" style="min-width: 300px;">
+          <h3 class="mb-3">Enter your name</h3>
+          <input [(ngModel)]="voter" placeholder="Your name" class="form-control mb-3" />
+          <button class="btn btn-primary w-100" (click)="submitName()">Join Room</button>
+        </div>
       </div>
-    </div>
+    }
+  
+    <!-- Voting Interface -->
+    <app-voting-card
+      (userDetails)="userDetails"
+      (vote)="voted($event)"
+      [clearVotes]="clearVotes"
+    ></app-voting-card>
+  
+    <!-- Vote Results -->
+    <h5 class="text-center my-4">Vote Results</h5>
+  
+  @if (!settings.reveal) {
+    <ul class="list-group">
+      @for (voter of objectKeys(votes); track voter) {
+        <li
+          class="list-group-item d-flex justify-content-between align-items-center mx-auto"
+          style="width: 33vw;"
+        >
+          <span>{{ voter }}:</span>
+  
+          @if (votes[voter] === "") {
+            <fa-icon [icon]="faSquare"></fa-icon>
+          } @else {
+            <span>
+              <fa-icon [icon]="faCheckSquare"></fa-icon>
+            </span>
+          }
+        </li>
+      }
+      @empty {
+        <li
+          class="list-group-item text-center mx-auto"
+          style="width: 33vw;"
+        >
+          No voters found.
+        </li>
+      }
+    </ul>
   }
-
-  <!-- ROW containing left and right panels -->
-  <div class="row">
-
-    <!-- Voting Card Section -->
-    <div class="col-md-8">
-      <app-voting-card
-        (userDetails)="(userDetails)"
-        (vote)="voted($event)"
-        [clearVotes]="clearVotes"
-      ></app-voting-card>
-    </div>
-
-    <!-- Results + Buttons Section -->
-    <div class="col-md-4">
-      <div class="card shadow p-4 h-100">
-        <h5 class="card-title text-center mb-4">Vote Results</h5>
-
-        <!-- Before Reveal -->
-        @if (!settings.reveal) {
-          <ul class="list-group">
-            @for (voter of objectKeys(votes); track voter) {
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                @if (votes[voter] === "") {
-                  <span>{{ voter }}:</span>
-                  <fa-icon [icon]="faSquare"></fa-icon>
-                } @else {
-                  <span>
-                    <span>{{ voter }}</span>
-                    <fa-icon [icon]="faCheckSquare"></fa-icon>
-                  </span>
-                }
-              </li>
-            }
-            @empty {
-              <li class="list-group-item">No Voters found.</li>
-            }
-          </ul>
-        }
-
-        <!-- After Reveal -->
-        @if (settings.reveal) {
-          <ul class="list-group">
-            @for (voter of objectKeys(sortedVotes); track voter) {
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span>{{ voter }}:</span>
-                <span>{{ votes[voter] }}</span>
-              </li>
-            }
-          </ul>
-        }
-
-        <!-- Reveal + Clear Buttons -->
-<!-- Reveal + Clear Votes buttons in one row, centered -->
-<!-- Reveal + Clear buttons in one row, centered and spaced -->
-<div class="mt-4 d-flex justify-content-center gap-2 w-100">
-  <button id="revealButton" class="btn btn-primary" (click)="revealClicked()">
-    {{ reveal ? "Hide" : "Reveal" }}
-  </button>
-  <button class="btn btn-danger" (click)="clearClicked()">Clear Votes</button>
-</div>
-
-<!-- Exit Room button in a separate row, right-aligned -->
-<div class="mt-3 d-flex justify-content-end w-100">
-  <button id="exit" class="btn btn-outline-secondary" (click)="exitRoom()">Exit Room</button>
-</div>
-
-<!-- Exit Room button in its own row, aligned right -->
-
-
+  
+  
+  
+  
+  @if (settings.reveal) {
+    <ul class="list-group">
+      @for (voter of objectKeys(sortedVotes); track voter) {
+        <li
+          class="list-group-item d-flex justify-content-between align-items-center mx-auto"
+          style="width: 33vw;"
+        >
+          <span>{{ voter }}:</span>
+          <span>{{ votes[voter] }}</span>
+        </li>
+      }
+    </ul>
+  }
+  
+  
+    <!-- Bottom Buttons Row -->
+    <div class="d-flex justify-content-between align-items-center mt-5 flex-wrap gap-2">
+      
+      <!-- Left: Reveal & Clear -->
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary" (click)="revealClicked()">
+          {{ reveal ? 'Hide' : 'Reveal' }}
+        </button>
+        <button class="btn btn-danger" (click)="clearClicked()">Clear Votes</button>
       </div>
+  
+      <!-- Right: Exit -->
+      <div>
+        <button class="btn btn-outline-secondary" (click)="exitRoom()">Exit Room</button>
+      </div>
+  
     </div>
   </div>
-</div>
+

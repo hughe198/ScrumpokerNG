@@ -1,0 +1,18 @@
+body {
+background-color: black;
+}
+
+.main-container {
+background-color: rgb(50, 50, 50);
+border-radius: 8px;
+padding: 2rem;
+padding-bottom: 600px;
+}
+
+
+footer {
+  background-color: rgb(255, 255, 255);
+  color: rgb(74, 73, 73);
+  padding: 1rem;
+  margin-top: 2rem;
+}
