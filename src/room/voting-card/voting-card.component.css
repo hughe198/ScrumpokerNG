@@ -1,42 +1,49 @@
-.square-img {
-    width: 240px;
-    height: 140px;
-    object-fit: cover; 
-  }
+/* ===== Voting Card Grid ===== */
+.votingCard {
+  display: grid;
+  gap: clamp(12px, 2vw, 20px);
+  justify-items: stretch;
+  align-items: start;
+  grid-template-columns: repeat(auto-fit, minmax(var(--tile-min, 200px), 1fr));
+}
 
-  .votingOption {
-    display: flex;
-    flex-direction: column;
-    align-items: center; 
-    justify-content: center; 
-    padding: 10px;
-  }
-
-  .votingCard {
+.votingOption {
   display: flex;
-  flex-wrap: wrap;
-  gap: 20px; 
+  flex-direction: column;
+  align-items: center;    /* center the (now narrower) image */
   justify-content: center;
+  min-width: 0;
+  width: 100%;
 }
 
-.votingOption.voteSelected {
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.5), rgba(255, 165, 0, 0.5));
-  border: 2px solid rgba(255, 165, 0, 0.8);
+/* ===== Images (keep ratio; limit width, not height) ===== */
+.square-img {
+  width: min(100%, var(--img-max, 160px)); /* width cap drives height */
+  height: auto;
+  aspect-ratio: 16 / 9;                    /* keeps the same ratio */
+  object-fit: cover;
   border-radius: 8px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+  display: block;
+  margin-inline: auto;
 }
 
-.votingOption:hover {
-  background: linear-gradient(135deg, rgba(255, 235, 0, 0.5), rgba(255, 200, 0, 0.5));
-  box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.15);
+.voting-card-text {
+  color: #000;
+  font-size: clamp(14px, 2.2vw, 28px);
 }
 
-.votingOption:active {
-  transform: scale(0.95);
+
+@media (min-width: 768px) {
+  .votingCard { --tile-min: 200px; }
+  .square-img { --img-max: 160px; } /* ~90px tall */
 }
 
-.voting-card-text{
-  color: rgb(0, 0, 0);
-  font-size: 30px;
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .votingCard { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .square-img { --img-max: clamp(90px, 14vw, 120px); } /* ~50–67px tall */
+}
+
+@media (max-width: 575.98px) {
+  .votingCard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .square-img { --img-max: clamp(70px, 18vw, 90px); }  /* width ~70–90px → height ~39–51px */
 }

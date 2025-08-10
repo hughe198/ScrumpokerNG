@@ -1,32 +1,58 @@
-body {
-background-color: black;
+.voting-container {
+  max-width: 1000px;  /* match your app-voting-card width */
+  width: 100%;
 }
 
-.main-container {
-  background-color: rgb(161, 151, 151);
-  border-radius: 8px;
-  padding: 2rem;
-  max-width: 1200px;       /* Prevent stretching on wide screens */
-  width: 90%;            /* Allow responsiveness on small screens */
-  box-sizing: border-box;
-  min-height: 80vh;       /* Optional: give it height to vertically center nicely */
-  overflow-y: auto;       /* In case content exceeds height */
+.vote-list-item {
+  width: 100%; /* fill container width */
 }
 
-
-footer {
-  background-color: rgb(255, 255, 255);
-  color: rgb(74, 73, 73);
-  padding: 1rem;
-  margin-top: 2rem;
-}
-
-:host {
+/* Bottom buttons row */
+.bottom-buttons {
   display: flex;
-  justify-content: center;
   align-items: center;
-  height: 100vh;
-  width: 100vw;
-  background-color: rgb(0, 0, 0);
-  overflow: hidden;
+  gap: 0.75rem;
+  flex-wrap: nowrap;
+}
+
+/* Left group expands */
+.bottom-buttons > .d-flex {
+  flex: 1 1 auto;
+  gap: 0.75rem;
+}
+
+/* Left buttons: grow but cap width */
+.bottom-buttons > .d-flex .btn {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 200px;
+  white-space: nowrap;
+}
+
+/* Right button: right-aligned, capped width */
+.bottom-buttons > div:last-child {
+  margin-left: auto;
+}
+.bottom-buttons > div:last-child .btn {
+  flex: 0 0 auto;
+  max-width: 200px;
+  white-space: nowrap;
+}
+
+/* Mobile: equal width buttons, no max-width limit */
+@media (max-width: 640px) {
+  .bottom-buttons > div:last-child {
+    margin-left: 0;
+    display: flex;
+    flex: 1 1 0;
+  }
+  .bottom-buttons > .d-flex .btn,
+  .bottom-buttons > div:last-child .btn {
+    flex: 1 1 0;
+    max-width: none;
+  }
+  .bottom-buttons .btn {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.6rem;
+  }
 }

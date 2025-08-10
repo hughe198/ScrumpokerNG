@@ -1,18 +1,18 @@
 body {
-background-color: black;
+background-color: rgb(255, 255, 255);
 }
 
 .main-container {
 background-color: white;
 border-radius: 8px;
 padding: 2rem;
-padding-bottom: 300px;
+padding-bottom: 10px;
 }
 
 .centered-banner {
 display: block;
 margin: 2rem auto;
-max-width:80%;
+max-width:60%;
 
 }
 
