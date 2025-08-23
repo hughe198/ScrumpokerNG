@@ -1,17 +1,27 @@
 <div class="container mx-3">
   Voting Card:
-  <select [(ngModel)]="selectedOption" (change)="onCardChange($event)" class="form-select">
-    @for(card of votingCard; track card.name){
-      <option [value]="card.name">{{card.name}}</option>
+  <select [(ngModel)]="selectedOption" (change)="onCardChange($event)" class="form-select mb-3">
+    @for (card of votingCard; track card.name) {
+      <option [value]="card.name">{{ card.name }}</option>
     }
   </select>
-  <div class="votingCard">
 
-  @for (option of selectedOptions ; track option.icon) {
-    <div id="option-{{option.value}}" class="votingOption" (click)="voteClicked(option.value)">
-      <img [src]="option.icon" class = "img-thumbnail square-img"/>
-      <span class="voting-card-text">{{ option.value }}</span>
-    </div>
-  }
-</div>
+  <div class="votingCard">
+    @for (option of selectedOptions; track option.icon) {
+      <div
+        id="option-{{ option.value }}"
+        class="votingOption"
+        role="button"
+        tabindex="0"
+        [class.is-selected]="currentVoteValue === option.value"
+        [attr.aria-pressed]="currentVoteValue === option.value"
+        (click)="voteClicked(option.value);"
+        (keydown.enter)="voteClicked(option.value);"
+        (keydown.space)="voteClicked(option.value);"
+      >
+        <img [src]="option.icon" class="img-thumbnail square-img" />
+        <span class="voting-card-text">{{ option.value }}</span>
+      </div>
+    }
+  </div>
 </div>

@@ -7,42 +7,72 @@
   grid-template-columns: repeat(auto-fit, minmax(var(--tile-min, 200px), 1fr));
 }
 
+/* Grid items */
 .votingOption {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;    /* center the (now narrower) image */
   justify-content: center;
   min-width: 0;
   width: 100%;
+  border-radius: 12px;
+  transition: box-shadow 120ms ease, outline-offset 120ms ease, background-color 120ms ease;
+}
+
+/* Hover/focus affordances */
+.votingOption:hover { background: rgb(0 0 0 / 0.03); }
+.votingOption:focus-visible {
+  outline: 2px dashed var(--bs-primary);
+  outline-offset: 4px;
+}
+
+/* Selected state (no layout shift) */
+.votingOption.is-selected {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgb(var(--bs-primary-rgb) / 0.12);
+  background: color-mix(in oklab, var(--bs-primary) 8%, transparent);
+}
+.votingOption.is-selected .square-img { transform: scale(0.96); }
+.votingOption.is-selected .voting-card-text {
+  color: var(--bs-primary);
+  font-weight: 600;
 }
 
 /* ===== Images (keep ratio; limit width, not height) ===== */
 .square-img {
   width: min(100%, var(--img-max, 160px)); /* width cap drives height */
   height: auto;
-  aspect-ratio: 16 / 9;                    /* keeps the same ratio */
+  aspect-ratio: 16 / 9;                    /* preserve shape */
   object-fit: cover;
   border-radius: 8px;
   display: block;
   margin-inline: auto;
+  transition: transform 120ms ease;
 }
 
+/* Labels */
 .voting-card-text {
   color: #000;
   font-size: clamp(14px, 2.2vw, 28px);
 }
 
+/* ===== Breakpoints ===== */
 
+/* md+ (≥768px): normal auto-fit, comfortable image cap */
 @media (min-width: 768px) {
   .votingCard { --tile-min: 200px; }
-  .square-img { --img-max: 160px; } /* ~90px tall */
+  .square-img { --img-max: 160px; } /* ~90px tall at 16:9 */
 }
 
+/* sm (576–767.98px): force 3 columns; smaller images */
 @media (min-width: 576px) and (max-width: 767.98px) {
   .votingCard { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .square-img { --img-max: clamp(90px, 14vw, 120px); } /* ~50–67px tall */
 }
 
+/* xs (<576px): 2 columns; ~40px-tall visuals */
 @media (max-width: 575.98px) {
   .votingCard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .square-img { --img-max: clamp(70px, 18vw, 90px); }  /* width ~70–90px → height ~39–51px */

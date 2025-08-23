@@ -28,7 +28,8 @@ export class VotingCardComponent implements OnInit {
   tshirtsCards = voteTshirts
   exponetialCards = voteExponential
   standardVote = voteStandard
-  
+
+  currentVoteValue:string = ""
   votingCard = [this.standardVote,this.fibonacciCards,this.exponetialCards, this.linearCards, this.tshirtsCards]
   selectedOptions = this.standardVote.selectedOptions()
   
@@ -64,7 +65,7 @@ export class VotingCardComponent implements OnInit {
   }
 
   voteClicked(voteValue: string) {
-
+    this.currentVoteValue =voteValue
     console.log(`Voted:${voteValue}`)
     this.toggleVoteButton(voteValue)
     this.vote.emit(voteValue)
@@ -87,6 +88,7 @@ export class VotingCardComponent implements OnInit {
 
   resetVoteCard()
     {
+    this.currentVoteValue = ""
     const buttons = document.querySelectorAll(".votingOption")
     buttons?.forEach(option => {
       if (option instanceof HTMLElement){
