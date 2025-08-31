@@ -1,5 +1,74 @@
-<canvas baseChart
-        [data]="barChartData"
-        [options]="barChartOptions"
-        [type]="'bar'">
-</canvas>
+<div class="chart-container">
+  @if (settings.reveal) {
+    
+    <!-- Consensus Panel -->
+    <section class="panel" [class.collapsed]="collapsed.consensus">
+      <header class="panel-header" (click)="toggle('consensus')" role="button"
+              [attr.aria-expanded]="!collapsed.consensus" tabindex="0"
+              (keydown.enter)="toggle('consensus')" (keydown.space)="toggle('consensus')">
+        <h3>Team Consensus</h3>
+        <span class="chevron" [class.rotate]="!collapsed.consensus">▾</span>
+      </header>
+      <div class="panel-body">
+        <div class="panel-content">
+          <div class="consensus-indicator" [style.border-left-color]="consensus.color">
+            <div class="consensus-level" [style.color]="consensus.color">{{ consensusDisplay }}</div>
+            <div class="consensus-recommendation">{{ consensus.recommendation }}</div>
+            <div class="consensus-bar">
+              <div class="consensus-fill"
+                   [style.width.%]="consensus.consensusPercentage"
+                   [style.background-color]="consensus.color"></div>
+              <span class="consensus-percentage">{{ consensus.consensusPercentage }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Statistics Panel -->
+    <section class="panel" [class.collapsed]="collapsed.statistics">
+      <header class="panel-header" (click)="toggle('statistics')" role="button"
+              [attr.aria-expanded]="!collapsed.statistics" tabindex="0"
+              (keydown.enter)="toggle('statistics')" (keydown.space)="toggle('statistics')">
+        <h3>Statistics</h3>
+        <span class="chevron" [class.rotate]="!collapsed.statistics">▾</span>
+      </header>
+      <div class="panel-body">
+        <div class="panel-content">
+          <div class="stats-grid">
+                  <div class="stat-item"><label>Mode:</label><span class="stat-value">{{ formattedMode }}</span></div>
+                  <div class="stat-item"><label>Range:</label><span class="stat-value">{{ formattedRange }}</span></div>
+                  <div class="stat-item"><label>Median:</label><span class="stat-value">{{ formattedMedian }}</span></div>
+                  <!-- <div class="stat-item"><label>Mean:</label><span class="stat-value">{{ formattedMean }}</span></div> -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chart Panel -->
+    <section class="panel" [class.collapsed]="collapsed.chart">
+      <header class="panel-header" (click)="toggle('chart')" role="button"
+              [attr.aria-expanded]="!collapsed.chart" tabindex="0"
+              (keydown.enter)="toggle('chart')" (keydown.space)="toggle('chart')">
+        <h3>Distribution</h3>
+        <span class="chevron" [class.rotate]="!collapsed.chart">▾</span>
+      </header>
+      <div class="panel-body">
+        <div class="panel-content">
+          <div class="chart-wrapper">
+            <canvas baseChart
+                    [data]="barChartData"
+                    [options]="barChartOptions"
+                    type="bar">
+            </canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  } @else {
+    <div class="hidden-message">
+      <h3>Results Hidden</h3>
+    </div>
+  }
+</div>

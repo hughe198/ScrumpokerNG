@@ -18,10 +18,11 @@ import { ISettings } from '../i-settings';
 import {  Subject, take, takeUntil } from 'rxjs';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { LobbyComponent } from '../lobby/lobby.component';
+import { BarchartComponent } from "./barchart/barchart.component";
 @Component({
   selector: 'app-room',
   standalone: true,
-  imports: [FormsModule, VotingCardComponent,FontAwesomeModule],
+  imports: [FormsModule, VotingCardComponent, FontAwesomeModule, BarchartComponent],
   templateUrl: './room.component.html',
   styleUrl: './room.component.css'
 })

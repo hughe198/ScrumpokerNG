@@ -1,0 +1,262 @@
+.chart-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}
+
+.chart-wrapper {
+  height: 400px;
+  width: 100%;
+}
+
+.consensus-box {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.consensus-box h3 {
+  margin: 0 0 15px 0;
+  color: #495057;
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+.consensus-indicator {
+  background-color: white;
+  border-radius: 6px;
+  padding: 15px;
+  border-left: 4px solid #6c757d;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.consensus-level {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.consensus-recommendation {
+  color: #6c757d;
+  font-size: 0.95em;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.consensus-bar {
+  position: relative;
+  background-color: #e9ecef;
+  border-radius: 10px;
+  height: 20px;
+  overflow: hidden;
+}
+
+.consensus-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.consensus-percentage {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8em;
+  font-weight: bold;
+  color: #495057;
+  text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+}
+
+.statistics-box {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.statistics-box h3 {
+  margin: 0 0 15px 0;
+  color: #495057;
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  background-color: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.stat-item label {
+  font-size: 0.9em;
+  color: #6c757d;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.stat-value {
+  font-size: 1.4em;
+  font-weight: bold;
+  color: #4263f6;
+}
+
+.hidden-message {
+  text-align: center;
+  padding: 60px 20px;
+  background-color: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  color: #6c757d;
+}
+
+.hidden-message h3 {
+  margin: 0 0 10px 0;
+  color: #495057;
+  font-size: 1.3em;
+}
+
+.hidden-message p {
+  margin: 0;
+  font-size: 1em;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .chart-wrapper {
+    height: 300px;
+  }
+}
+
+/* ======= Unified Panel Look & Feel ======= */
+.panel {
+  border: 1px solid #e5e7eb;          /* light gray */
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  margin-bottom: 16px;
+  margin-top:16px;
+  overflow: hidden;                    /* hide body when collapsed */
+}
+
+/* Clickable header (toggle target) */
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+  background: #f8fafc;                 /* subtle */
+}
+
+.panel-header:focus {
+  outline: 2px solid #94a3b8;          /* accessible focus */
+  outline-offset: -2px;
+}
+
+/* Chevron indicator rotation */
+.chevron {
+  transition: transform 0.2s ease;
+}
+.chevron.rotate {
+  transform: rotate(180deg);
+}
+
+/* ======= Collapsible Body (CSS-only) ======= */
+/* Grid "1fr → 0fr" trick; panel-body must have exactly one child (.panel-content) */
+.panel-body {
+  padding: 12px 14px;
+  transition: grid-template-rows 0.25s ease, padding 0.25s ease;
+  display: grid;
+  grid-template-rows: 1fr;             /* expanded */
+}
+
+/* The single child that actually collapses */
+.panel-content {
+  overflow: hidden;
+}
+
+/* Collapsed state */
+.panel.collapsed .panel-body {
+  grid-template-rows: 0fr;             /* collapsed */
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* ======= Inner Content Styles (unchanged but unified) ======= */
+.consensus-indicator {
+  border-left: 6px solid transparent;  /* color set inline via [style.border-left-color] */
+  padding-left: 12px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px 16px;
+}
+
+.stat-item label {
+  color: #6b7280;
+  margin-right: 6px;
+}
+
+/* ======= Chart Collapse Fixes ======= */
+/* Allow the wrapper to animate height nicely */
+.chart-wrapper {
+  width: 100%;
+  max-height: 1000px;                   /* big enough for your chart */
+  transition: max-height 0.25s ease;
+}
+
+/* When collapsed, animate wrapper closed */
+.panel.collapsed .chart-wrapper {
+  max-height: 0;
+}
+
+/* Chart.js canvas behavior:
+   - Ensure it respects wrapper collapse
+   - Fully zero canvas height when collapsed */
+.chart-wrapper canvas {
+  display: block;
+  width: 100% !important;               /* Chart.js sizing can be stubborn */
+  height: auto;                         /* expand naturally when open */
+}
+
+.panel.collapsed .chart-wrapper canvas {
+  height: 0 !important;                 /* fully collapsed */
+}
+
+/* ======= Optional helpers ======= */
+.hidden-message {
+  padding: 12px 14px;
+  border: 1px dashed #e5e7eb;
+  border-radius: 12px;
+  background: #fafafa;
+}
+
+/* Chart wrapper can stretch nicely */
+.chart-wrapper {
+  width: 100%;
+}
