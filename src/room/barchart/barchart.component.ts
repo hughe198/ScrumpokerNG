@@ -14,6 +14,19 @@ interface Statistics {
   range: number;
 }
 
+interface VotingGroup {
+  rate: number;
+  value: string;  
+  count: number;
+  percentage: number;
+}
+
+interface VotingPattern {
+  camps: VotingGroup[];
+  pattern: 'single' | 'twocamp' | 'threecamp' | 'scattered';
+  description: string;
+}
+
 interface ConsensusInfo {
   level: 'Excellent' | 'Good' | 'Fair' | 'Poor';
   recommendation: string;
@@ -144,9 +157,14 @@ export class BarchartComponent implements OnInit, OnDestroy {
     const voteType = getVoteByName(this.settings.votingCard as VoteName);
     const voteOptions = voteType.selectedOptions();
 
-    // Get all the rates (numeric values) for voted options
+    // Get all the rates (numeric values) for voted options, excluding coffee votes
     const rates: number[] = [];
     for (const voteValue of Object.values(this.votes)) {
+      // Skip coffee votes (value "Coffee" or "☕") as they're not estimation votes
+      if (voteValue === 'Coffee' || voteValue === '☕') {
+        continue;
+      }
+      
       const voteOption = voteOptions.find(option => option.value === voteValue);
       if (voteOption) {
         rates.push(voteOption.rate);
@@ -186,6 +204,346 @@ export class BarchartComponent implements OnInit, OnDestroy {
     this.statistics = { mean, median, mode, range };
   }
 
+  private detectVotingCamps(validVotes: string[]): VotingPattern {
+    if (!this.settings || validVotes.length === 0) {
+      return { camps: [], pattern: 'scattered', description: 'No valid votes to analyze' };
+    }
+
+    const voteType = getVoteByName(this.settings.votingCard as VoteName);
+    const voteOptions = voteType.selectedOptions().sort((a, b) => a.rate - b.rate);
+
+    // Count votes and create voting groups
+    const voteCounts: { [rate: number]: { count: number, value: string } } = {};
+    
+    for (const voteValue of validVotes) {
+      const voteOption = voteOptions.find(option => option.value === voteValue);
+      if (voteOption) {
+        if (!voteCounts[voteOption.rate]) {
+          voteCounts[voteOption.rate] = { count: 0, value: voteOption.value };
+        }
+        voteCounts[voteOption.rate].count++;
+      }
+    }
+
+    // Convert to VotingGroup array and sort by count (descending)
+    const allGroups: VotingGroup[] = Object.entries(voteCounts)
+      .map(([rate, data]) => ({
+        rate: Number(rate),
+        value: data.value,
+        count: data.count,
+        percentage: Math.round((data.count / validVotes.length) * 100)
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    // Team size-based camp detection thresholds
+    const teamSize = validVotes.length;
+    let minCampSize: number;
+    let minCampPercentage: number;
+
+    if (teamSize <= 4) {
+      // Small teams: need 2+ people per camp
+      minCampSize = 2;
+      minCampPercentage = 0; // Percentage not relevant for small teams
+    } else if (teamSize <= 7) {
+      // Medium teams: need 2+ people OR 20%+ support per camp
+      minCampSize = 2;
+      minCampPercentage = 20;
+    } else {
+      // Large teams: need 15%+ support OR 2+ people per camp
+      minCampSize = 2;
+      minCampPercentage = 15;
+    }
+
+    // Filter groups that qualify as "camps"
+    const significantCamps = allGroups.filter(group => 
+      group.count >= minCampSize || group.percentage >= minCampPercentage
+    );
+
+    // Determine pattern based on number of significant camps
+    let pattern: VotingPattern['pattern'];
+    let description: string;
+
+    if (significantCamps.length === 0) {
+      pattern = 'scattered';
+      description = 'No significant voting groups formed';
+    } else if (significantCamps.length === 1) {
+      pattern = 'single';
+      description = `Single dominant group with ${significantCamps[0].percentage}% support`;
+    } else if (significantCamps.length === 2) {
+      pattern = 'twocamp';
+      description = `Two camps: ${significantCamps[0].percentage}% vs ${significantCamps[1].percentage}%`;
+    } else if (significantCamps.length === 3) {
+      pattern = 'threecamp';
+      description = `Three camps: ${significantCamps[0].percentage}% vs ${significantCamps[1].percentage}% vs ${significantCamps[2].percentage}%`;
+    } else {
+      pattern = 'scattered';
+      description = `${significantCamps.length} camps detected - highly fragmented`;
+    }
+
+    return {
+      camps: significantCamps,
+      pattern,
+      description
+    };
+  }
+
+  // Enhanced comment system with multiple variants
+  private readonly commentVariants = {
+    singleWinner: [
+      "Team actually agrees on something",
+      "Miracles do happen after all",
+      "Stars have aligned magnificently",
+      "Everyone's singing from the same hymn sheet",
+      "Consensus achieved - mark this day in history",
+      "Unity at last - who'd have thought it possible",
+      "Team's found their collective voice",
+      "Perfect harmony in this digital democracy",
+      "Agreement reached without bloodshed",
+      "Synchronicity in the workplace - rare as hen's teeth",
+      "Team's channeling their inner hive mind",
+      "Collective wisdom has emerged from chaos"
+    ],
+    twoCamps: [
+      "Two tribes have spoken",
+      "Team's split into opposing factions", 
+      "Classic battle of perspectives unfolds",
+      "Democracy divided into a neat binary",
+      "Team's gone full parliamentary - government vs opposition",
+      "Two-party system has emerged from the masses",
+      "Camps have been drawn in the digital sand",
+      "Tale of two estimates - Dickensian in scope",
+      "Team's playing estimate ping-pong",
+      "Dueling banjos of estimation",
+      "Two schools of thought have formed academic departments"
+    ],
+    threeCamps: [
+      "Three-way philosophical divide detected",
+      "Team's formed a voting triangle of confusion",
+      "Democracy in action - three-party coalition needed", 
+      "Triple threat estimation scenario",
+      "Team's gone full three-ring circus",
+      "Triumvirate of opinions has emerged",
+      "Three wise monkeys approach to estimation",
+      "Team's achieved perfect triangulation of disagreement",
+      "Three-course meal of varying opinions served",
+      "Trinity of estimates - biblical proportions",
+      "Three musketeers of estimation dysfunction",
+      "Trio of trouble in the voting booth"
+    ],
+    scattered: [
+      "Complete and utter pandemonium reigns",
+      "Votes scattered like autumn leaves in a hurricane",
+      "Team's gone completely rogue",
+      "Estimation anarchy has been declared",
+      "Everyone's marching to their own drummer",
+      "Chaos theory in practical demonstration",
+      "Team's embracing their inner rebel",
+      "Democratic process has turned into a free-for-all",
+      "Voting has devolved into beautiful madness",
+      "Team's achieving peak disagreement efficiency",
+      "Estimates scattered across the known universe",
+      "Collective decision-making has left the building"
+    ],
+    rangeModifiers: {
+      tiny: [
+        "(practically carbon copies)",
+        "(basically identical twins)", 
+        "(within spitting distance)",
+        "(close enough to share a brew)",
+        "(near as makes no difference)",
+        "(splitting hairs at this point)",
+        "(practically joined at the hip)",
+        "(close enough for jazz)",
+        "(within margin of error territory)",
+        "(almost telepathically aligned)",
+        "(difference barely measurable by science)",
+        "(so close they might be related)"
+      ],
+      small: [
+        "(close enough to share a pint)",
+        "(near enough for government work)",
+        "(within polite disagreement range)",
+        "(minor philosophical differences)",
+        "(slight variations on a theme)",
+        "(small gaps in the grand scheme)",
+        "(close enough to call it quits)",
+        "(minor turbulence in agreement)",
+        "(tiny rifts in the consensus fabric)",
+        "(manageable differences of opinion)",
+        "(small potatoes in estimation terms)",
+        "(close enough to not lose sleep over)"
+      ],
+      moderate: [
+        "(with some healthy disagreement)",
+        "(showing creative differences)",
+        "(moderate gaps in understanding)",
+        "(reasonable distance between camps)",
+        "(respectable disagreement detected)",
+        "(moderate turbulence ahead)",
+        "(healthy debate territory)",
+        "(manageable philosophical divide)",
+        "(reasonable spread of opinion)",
+        "(moderate estimation weather conditions)",
+        "(civilized disagreement zone)",
+        "(acceptable variance detected)"
+      ],
+      large: [
+        "(despite talking completely different languages)",
+        "(bridging significant philosophical chasms)",
+        "(spanning considerable intellectual real estate)",
+        "(covering substantial disagreement territory)",
+        "(major gaps in team consensus)",
+        "(significant estimation weather disturbance)",
+        "(large philosophical continents apart)",
+        "(substantial rifts in the team fabric)",
+        "(major differences requiring diplomatic intervention)",
+        "(significant estimation earthquake detected)",
+        "(large-scale consensus breakdown)",
+        "(major disagreement storm brewing)"
+      ],
+      huge: [
+        "(spanning the Grand Canyon of disagreement)",
+        "(linking different geological eras)",
+        "(connecting parallel universes of thought)",
+        "(bridging continental drift levels of difference)",
+        "(somehow spanning intergalactic distances)",
+        "(covering light-years of estimation space)",
+        "(touching different dimensions of disagreement)",
+        "(reaching epic proportions of variance)",
+        "(achieving legendary levels of discord)",
+        "(spanning oceanic depths of difference)",
+        "(reaching astronomical levels of disagreement)",
+        "(covering vast wilderness of estimation chaos)"
+      ]
+    },
+    discussionActions: {
+      single: [
+        "crack on with confidence",
+        "Bob's your uncle and Fanny's your aunt",
+        "proceed with all due haste",
+        "job's a good'un - carry on",
+        "mission accomplished - time for tea",
+        "sorted - no drama required",
+        "in the bag - champagne time",
+        "done and dusted like Sunday roast",
+        "sealed deal - victory lap warranted",
+        "consensus achieved - celebration pending",
+        "agreement locked in - keys thrown away",
+        "decision made - universe aligned"
+      ],
+      twocamp: [
+        "mediate between the two factions",
+        "bridge the divide between the duo", 
+        "find middle ground between the two tribes",
+        "negotiate a peace treaty between the pair",
+        "diplomatic summit required for the two camps",
+        "marriage counseling for the two opposing sides",
+        "United Nations intervention for the binary divide",
+        "peace talks needed between the warring duo",
+        "compromise conference for the two factions",
+        "neutral territory meeting for the opposing camps",
+        "diplomatic breakthrough needed for the pair",
+        "ceasefire negotiations for the two armies"
+      ],
+      threecamp: [
+        "United Nations summit required for the trio",
+        "group therapy for the three warring factions",
+        "tri-party negotiation session needed",
+        "three-way peace conference immediately",
+        "triangular diplomacy summit required",
+        "trinity of discussion needed urgently",
+        "three-ring negotiation circus time",
+        "triple threat mediation session",
+        "trilateral peace accords needed",
+        "three-course diplomatic dinner required",
+        "triumvirate resolution meeting called",
+        "three-party coalition government assembly"
+      ],
+      scattered: [
+        "emergency all-hands meeting immediately",
+        "full team intervention required urgently",
+        "crisis management protocols activated",
+        "everyone back to the drawing board",
+        "emergency powwow needed desperately",
+        "immediate team realignment session",
+        "urgent collective therapy required",
+        "emergency consensus building workshop",
+        "immediate democratic reconstruction needed",
+        "crisis resolution summit called",
+        "emergency team alignment intervention",
+        "immediate estimation rehabilitation program"
+      ]
+    }
+  };
+
+  private getRandomVariant(variants: string[]): string {
+    return variants[Math.floor(Math.random() * variants.length)];
+  }
+
+  private generateRecommendation(votingPattern: VotingPattern, teamRangeMagnitude: string, coreRangeMagnitude: string, totalCoffeeVotes: number): string {
+    let coreDescription: string;
+    let discussionAction: string;
+    let rangeModifier: string;
+
+    // Select core description based on voting pattern
+    switch (votingPattern.pattern) {
+      case 'single':
+        coreDescription = this.getRandomVariant(this.commentVariants.singleWinner);
+        discussionAction = this.getRandomVariant(this.commentVariants.discussionActions.single);
+        break;
+      case 'twocamp':
+        coreDescription = this.getRandomVariant(this.commentVariants.twoCamps);
+        discussionAction = this.getRandomVariant(this.commentVariants.discussionActions.twocamp);
+        break;
+      case 'threecamp':
+        coreDescription = this.getRandomVariant(this.commentVariants.threeCamps);
+        discussionAction = this.getRandomVariant(this.commentVariants.discussionActions.threecamp);
+        break;
+      case 'scattered':
+      default:
+        coreDescription = this.getRandomVariant(this.commentVariants.scattered);
+        discussionAction = this.getRandomVariant(this.commentVariants.discussionActions.scattered);
+        break;
+    }
+
+    // Select range modifier based on magnitude (prioritize core range for camps, team range for scattered)
+    const primaryRangeMagnitude = votingPattern.pattern === 'scattered' ? teamRangeMagnitude : coreRangeMagnitude;
+    
+    switch (primaryRangeMagnitude) {
+      case 'tiny':
+        rangeModifier = this.getRandomVariant(this.commentVariants.rangeModifiers.tiny);
+        break;
+      case 'small':
+        rangeModifier = this.getRandomVariant(this.commentVariants.rangeModifiers.small);
+        break;
+      case 'moderate':
+        rangeModifier = this.getRandomVariant(this.commentVariants.rangeModifiers.moderate);
+        break;
+      case 'large':
+        rangeModifier = this.getRandomVariant(this.commentVariants.rangeModifiers.large);
+        break;
+      case 'huge':
+        rangeModifier = this.getRandomVariant(this.commentVariants.rangeModifiers.huge);
+        break;
+      default:
+        rangeModifier = '';
+        break;
+    }
+
+    // Build the recommendation
+    let recommendation = `${coreDescription} ${rangeModifier} - ${discussionAction}`;
+
+    // Add coffee note if some people need caffeine
+    if (totalCoffeeVotes > 0) {
+      const coffeeNote = totalCoffeeVotes === 1 
+        ? ' (1 person desperately needs coffee)'
+        : ` (${totalCoffeeVotes} people desperately need coffee)`;
+      recommendation += coffeeNote;
+    }
+
+    return recommendation;
+  }
+
   private calculateConsensus(): void {
     if (!this.settings || !this.votes || !this.settings.reveal) {
       this.consensus = { level: 'Poor', recommendation: 'No data available', color: '#6c757d', consensusPercentage: 0, modePercentage: 0 };
@@ -193,11 +551,43 @@ export class BarchartComponent implements OnInit, OnDestroy {
     }
 
     // Right then, let's bin the empty votes because they're about as useful as a chocolate teapot
-    const validVotes = Object.values(this.votes).filter(vote => vote && vote.trim() !== '');
-    const totalValidVotes = validVotes.length;
+    const allVotes = Object.values(this.votes).filter(vote => vote && vote.trim() !== '');
     
+    // Identify coffee votes (value "Coffee" or "☕") as non-votes - they're just wanting a brew break
+    const coffeeVotes = allVotes.filter(vote => vote === 'Coffee' || vote === '☕');
+    const validVotes = allVotes.filter(vote => vote !== 'Coffee' && vote !== '☕');
+    const totalValidVotes = validVotes.length;
+    const totalCoffeeVotes = coffeeVotes.length;
+    const totalAllVotes = allVotes.length;
+    
+    // Check for coffee break scenarios - when everyone's gagging for a brew
     if (totalValidVotes === 0) {
-      this.consensus = { level: 'Poor', recommendation: 'No valid votes cast yet', color: '#6c757d', consensusPercentage: 0, modePercentage: 0 };
+      if (totalCoffeeVotes === totalAllVotes && totalCoffeeVotes > 0) {
+        // Everyone voted for coffee - time for a proper break!
+        this.consensus = { 
+          level: 'Excellent', 
+          recommendation: `Perfect consensus - everyone's crying out for a coffee break! Time to down tools and put the kettle on (${totalCoffeeVotes} coffee votes)`, 
+          color: '#6f4e37', // Coffee brown color
+          consensusPercentage: 100, 
+          modePercentage: 100 
+        };
+      } else {
+        this.consensus = { level: 'Poor', recommendation: 'No valid votes cast yet', color: '#6c757d', consensusPercentage: 0, modePercentage: 0 };
+      }
+      return;
+    }
+
+    // Check if large proportion wants coffee break
+    const coffeePercentage = (totalCoffeeVotes / totalAllVotes) * 100;
+    if (coffeePercentage >= 50) {
+      // Half or more want coffee - that's a strong signal
+      this.consensus = { 
+        level: 'Good', 
+        recommendation: `${Math.round(coffeePercentage)}% of the team needs a coffee break - maybe address the caffeine crisis before estimating further`, 
+        color: '#6f4e37', // Coffee brown color
+        consensusPercentage: Math.round(coffeePercentage), 
+        modePercentage: Math.round(coffeePercentage)
+      };
       return;
     }
 
@@ -206,10 +596,24 @@ export class BarchartComponent implements OnInit, OnDestroy {
       const uniqueVotes = [...new Set(validVotes)];
       if (uniqueVotes.length === 1) {
         // Both voted the same - that's consensus 
-        this.consensus = { level: 'Excellent', recommendation: 'Perfect consensus between you two - crack on', color: '#28a745', consensusPercentage: 100, modePercentage: 100 };
+        const twoVoterConsensusPattern: VotingPattern = { camps: [], pattern: 'single', description: 'Two-voter consensus' };
+        this.consensus = { 
+          level: 'Excellent', 
+          recommendation: this.generateRecommendation(twoVoterConsensusPattern, 'tiny', 'tiny', totalCoffeeVotes), 
+          color: '#28a745', 
+          consensusPercentage: 100, 
+          modePercentage: 100 
+        };
       } else {
         // They disagree - no consensus possible
-        this.consensus = { level: 'Poor', recommendation: 'Two people, two opinions - get more voters or flip a coin', color: '#dc3545', consensusPercentage: 0, modePercentage: 50 };
+        const twoVoterDisagreementPattern: VotingPattern = { camps: [], pattern: 'scattered', description: 'Two-voter disagreement' };
+        this.consensus = { 
+          level: 'Poor', 
+          recommendation: this.generateRecommendation(twoVoterDisagreementPattern, 'huge', 'huge', totalCoffeeVotes), 
+          color: '#dc3545', 
+          consensusPercentage: 0, 
+          modePercentage: 50 
+        };
       }
       return;
     }
@@ -287,6 +691,9 @@ export class BarchartComponent implements OnInit, OnDestroy {
     const teamRangeMagnitude = classifyRange(teamRatio);
     const coreRangeMagnitude = classifyRange(coreRatio);
 
+    // Detect voting camps for enhanced commentary
+    const votingPattern = this.detectVotingCamps(validVotes);
+
     // Right, let's see how much consensus we can pretend exists
     let baseConsensusPercentage: number;
     let baseLevel: 'Excellent' | 'Good' | 'Fair' | 'Poor';
@@ -294,9 +701,10 @@ export class BarchartComponent implements OnInit, OnDestroy {
 
     // Blimey, everyone actually agrees? Mark this date in the calendar
     if (positionRange === 0) {
+      const perfectConsensusPattern: VotingPattern = { camps: [], pattern: 'single', description: 'Perfect consensus' };
       this.consensus = {
         level: 'Excellent',
-        recommendation: 'Perfect consensus - proceed with estimate',
+        recommendation: this.generateRecommendation(perfectConsensusPattern, 'tiny', 'tiny', totalCoffeeVotes),
         color: '#28a745',
         consensusPercentage: 100,
         modePercentage: 100
@@ -430,8 +838,8 @@ export class BarchartComponent implements OnInit, OnDestroy {
     // Final tally - optimism minus harsh reality
     const consensusPercentage = Math.max(10, baseConsensusPercentage - corePenalty - teamPenalty);
 
-    // Stick it all together like a proper British sandwich
-    let recommendation = coreDescription + coreRangeModifier + teamRangeModifier + ' - ' + discussionNeeded;
+    // Use enhanced comment system for better variety and camp-aware recommendations
+    const recommendation = this.generateRecommendation(votingPattern, teamRangeMagnitude, coreRangeMagnitude, totalCoffeeVotes);
 
     // Choose the appropriate shade of concern
     let color: string;

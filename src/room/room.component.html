@@ -24,7 +24,7 @@
   <!-- Vote Results -->
   <h5 class="text-center my-4">Vote Results</h5>
 
-  @if (!settings.reveal) {
+  @if (settings && !settings.reveal) {
     <ul class="list-group">
       @for (voter of objectKeys(votes); track voter) {
         <li class="list-group-item d-flex justify-content-between align-items-center vote-list-item">
@@ -44,7 +44,7 @@
     </ul>
   }
 
-  @if (settings.reveal) {
+  @if (settings && settings.reveal) {
     <ul class="list-group">
       @for (voter of objectKeys(sortedVotes); track voter) {
         <li class="list-group-item d-flex justify-content-between align-items-center vote-list-item">

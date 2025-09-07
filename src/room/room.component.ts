@@ -57,7 +57,7 @@ export class RoomComponent implements OnDestroy, OnInit {
   voter: string = ""
   votes!: IVotes
   results!: IResults
-  settings!:ISettings
+  settings: ISettings | null = null
   voteString: string = ""
   userDetails: IUserDetails | null
   clearVotes = new Subject<void>()
@@ -71,23 +71,20 @@ export class RoomComponent implements OnDestroy, OnInit {
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       this.roomId = params.get('roomId')
-      console.log(this.roomId)
       const userDetails = this.localstorage.getUserDetails();
+    
     if (this.roomId && userDetails?.voter){
-      if (userDetails.voter){
-        this.voter = this.userDetails?.voter ?? ""
-      }
+      // User has both roomId and saved voter name - connect directly
+      this.voter = userDetails.voter;
       this.api.connect(this.roomId,userDetails.voter)
       this.connectRoom()
+    } else if (this.roomId && !userDetails?.voter) {
+      // User has roomId but no saved voter name - show modal to enter name
+      this.showVoterModal = true;
     }
     })
 
-    this.api.getDuplicateNameObservable().pipe(take(1)).subscribe(isDuplicate =>{
-        if(isDuplicate){
-          this.showVoterModal = true
-          return
-        }
-      })
+    // Duplicate name handling is now in submitName() method
 
 
 
@@ -215,22 +212,33 @@ return sortedData.reduce<IVotes>((acc, [key, val]) => {
 }
 
 submitName():void{
-  this.showVoterModal = false
   const trimmedName = this.voter.trim()
   if (this.roomId && trimmedName){
-  this.api.connect(this.roomId, trimmedName);
-  this.localstorage.setUserDetails({
-    voter:trimmedName,
-    roomID:this.roomId,
-    votingCard:'Standard'
-  })
+    // Close modal and save details first
+    this.showVoterModal = false;
+    this.localstorage.setUserDetails({
+      voter: trimmedName,
+      roomID: this.roomId,
+      votingCard: 'Standard'
+    });
+    
+    // Set up duplicate name handling
+    const duplicateNameSub = this.api.getDuplicateNameObservable().pipe(take(1)).subscribe(isDuplicate => {
+      if(isDuplicate){
+        // Reopen modal and clear the name for re-entry
+        this.showVoterModal = true;
+        this.voter = '';
+        console.log("Duplicate name detected, please try another name");
+      }
+    });
+    
+    // Connect and set up room subscriptions
+    this.api.connect(this.roomId, trimmedName);
+    this.connectRoom();
   }
   else{
-    console.log("Error rejoining room")
+    console.log("Error: missing room ID or name")
   }
-
-
-  
 }
 
 exitRoom(){

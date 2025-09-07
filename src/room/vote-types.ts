@@ -5,6 +5,7 @@ export const voteStandard:IVoteType=
   name:"Standard",
   identifier:"standard",
   selectedOptions: ()=>[
+    {rate:0, value:"Coffee",icon:"assets/icons/coffee/coffee-mug.png"},
     {rate:1, value:"1",icon:"assets/icons/fibonacci/1.png"},
     {rate:2, value:"2",icon:"assets/icons/fibonacci/2.png"},
     {rate:3, value:"3",icon:"assets/icons/fibonacci/3.png"},
@@ -21,6 +22,7 @@ export const voteFibonacci:IVoteType=
   name:"Fibonacci",
   identifier:"fibonacci",
   selectedOptions: ()=>[
+    {rate:0,value:"Coffee",icon:"assets/icons/coffee/coffee-mug.png"},
     {rate:1,value:"1",icon:"assets/icons/fibonacci/1.png"},
     {rate:2,value:"2",icon:"assets/icons/fibonacci/2.png"},
     {rate:3,value:"3",icon:"assets/icons/fibonacci/3.png"},
@@ -37,6 +39,7 @@ export const voteFibonacci:IVoteType=
   name:"Exponential",
   identifier:"exponential",
   selectedOptions: ()=>[
+    {rate:0,value:"Coffee",icon:"assets/icons/coffee/coffee-mug.png"},
     {rate:1,value:"1",icon:"assets/icons/exponential/1.png"},
     {rate:2,value:"2",icon:"assets/icons/exponential/2.png"},
     {rate:4,value:"4",icon:"assets/icons/exponential/3.png"},
@@ -53,6 +56,7 @@ export const voteFibonacci:IVoteType=
   name:"Linear",
   identifier:"linear",
   selectedOptions: ()=>[
+    {rate:0,value:"Coffee",icon:"assets/icons/coffee/coffee-mug.png"},
     {rate:1,value:"1",icon:"assets/icons/linear/1.png"},
     {rate:2,value:"2",icon:"assets/icons/linear/2.png"},
     {rate:3,value:"3",icon:"assets/icons/linear/3.png"},
@@ -69,6 +73,7 @@ export const voteTshirts:IVoteType={
   name:"T-Shirt Sizes",
   identifier:"t-shirts",
   selectedOptions: ()=>[
+    {rate:0,value:"☕",icon:"assets/icons/coffee/coffee-mug.png"},
     {rate:1,value:"XS",icon:"assets/icons/t-shirts/1.png"},
     {rate:2,value:"S",icon:"assets/icons/t-shirts/2.png"},
     {rate:3,value:"M",icon:"assets/icons/t-shirts/3.png"},
