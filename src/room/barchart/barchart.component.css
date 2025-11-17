@@ -11,8 +11,8 @@
 }
 
 .consensus-box {
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
+  background-color: var(--bs-secondary-bg);
+  border: 1px solid var(--bs-border-color);
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -20,16 +20,16 @@
 
 .consensus-box h3 {
   margin: 0 0 15px 0;
-  color: #495057;
+  color: var(--bs-body-color);
   font-size: 1.2em;
   font-weight: 600;
 }
 
 .consensus-indicator {
-  background-color: white;
+  background-color: var(--bs-body-bg);
   border-radius: 6px;
   padding: 15px;
-  border-left: 4px solid #6c757d;
+  border-left: 4px solid var(--bs-secondary-color);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -40,7 +40,7 @@
 }
 
 .consensus-recommendation {
-  color: #6c757d;
+  color: var(--bs-secondary-color);
   font-size: 0.95em;
   margin-bottom: 12px;
   line-height: 1.4;
@@ -48,7 +48,7 @@
 
 .consensus-bar {
   position: relative;
-  background-color: #e9ecef;
+  background-color: var(--bs-border-color);
   border-radius: 10px;
   height: 20px;
   overflow: hidden;
@@ -68,13 +68,13 @@
   transform: translateY(-50%);
   font-size: 0.8em;
   font-weight: bold;
-  color: #495057;
-  text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+  color: var(--bs-body-color);
+  text-shadow: 0 0 3px var(--bs-body-bg);
 }
 
 .statistics-box {
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
+  background-color: var(--bs-secondary-bg);
+  border: 1px solid var(--bs-border-color);
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -82,7 +82,7 @@
 
 .statistics-box h3 {
   margin: 0 0 15px 0;
-  color: #495057;
+  color: var(--bs-body-color);
   font-size: 1.2em;
   font-weight: 600;
 }
@@ -98,14 +98,14 @@
   flex-direction: column;
   align-items: center;
   padding: 10px;
-  background-color: white;
+  background-color: var(--bs-body-bg);
   border-radius: 6px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .stat-item label {
   font-size: 0.9em;
-  color: #6c757d;
+  color: var(--bs-secondary-color);
   font-weight: 500;
   margin-bottom: 5px;
 }
@@ -119,15 +119,15 @@
 .hidden-message {
   text-align: center;
   padding: 60px 20px;
-  background-color: #f8f9fa;
-  border: 2px dashed #dee2e6;
+  background-color: var(--bs-secondary-bg);
+  border: 2px dashed var(--bs-border-color);
   border-radius: 8px;
-  color: #6c757d;
+  color: var(--bs-secondary-color);
 }
 
 .hidden-message h3 {
   margin: 0 0 10px 0;
-  color: #495057;
+  color: var(--bs-body-color);
   font-size: 1.3em;
 }
 
@@ -149,9 +149,9 @@
 
 /* ======= Unified Panel Look & Feel ======= */
 .panel {
-  border: 1px solid #e5e7eb;          /* light gray */
+  border: 1px solid var(--bs-border-color);
   border-radius: 12px;
-  background: #fff;
+  background: var(--bs-body-bg);
   box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   margin-bottom: 16px;
   margin-top:16px;
@@ -168,11 +168,11 @@
   cursor: pointer;
   user-select: none;
   font-weight: 600;
-  background: #f8fafc;                 /* subtle */
+  background: var(--bs-secondary-bg);
 }
 
 .panel-header:focus {
-  outline: 2px solid #94a3b8;          /* accessible focus */
+  outline: 2px solid var(--bs-primary);
   outline-offset: -2px;
 }
 
@@ -218,7 +218,7 @@
 }
 
 .stat-item label {
-  color: #6b7280;
+  color: var(--bs-secondary-color);
   margin-right: 6px;
 }
 
@@ -251,9 +251,9 @@
 /* ======= Optional helpers ======= */
 .hidden-message {
   padding: 12px 14px;
-  border: 1px dashed #e5e7eb;
+  border: 1px dashed var(--bs-border-color);
   border-radius: 12px;
-  background: #fafafa;
+  background: var(--bs-secondary-bg);
 }
 
 /* Chart wrapper can stretch nicely */

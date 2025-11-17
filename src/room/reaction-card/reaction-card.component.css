@@ -1,0 +1,34 @@
+.reaction-wrapper {
+    position: relative;
+    display: inline-bloc
+}
+
+.reaction-toggle{
+    border: none;
+    background: transparent;
+    font: size 1.5rem;
+    cursor: pointer;
+}
+
+.reaction-picker {
+    position: absolute;
+    bottom: 100%;
+    left:0;
+    display: flex;
+    gap:6px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 6px 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.reaction-emoji{
+    cursor:pointer;
+    font-size:1.4rem;
+    transition: transform 0.1s;
+}
+
+.reaction-emoji:hover{
+    transform: scale(1.2)
+}

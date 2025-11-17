@@ -1,4 +1,8 @@
 
+  <!-- Theme toggle in top-right corner -->
+  <div class="position-fixed top-0 end-0 p-3" style="z-index: 1001;">
+    <app-theme-toggle></app-theme-toggle>
+  </div>
 
   <div class="main-container" >
   
@@ -7,7 +11,7 @@
       <div class="modal-overlay position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex justify-content-center align-items-center z-3">
         <div class="modal-content bg-white p-4 rounded shadow" style="min-width: 300px;">
           <h3 class="mb-3">Enter your name</h3>
-          <input [(ngModel)]="voter" placeholder="Your name" class="form-control mb-3" />
+          <input [(ngModel)]="userName" placeholder="Your name" class="form-control mb-3" />
           <button class="btn btn-primary w-100" (click)="submitName()">Join Room</button>
         </div>
       </div>
@@ -29,7 +33,7 @@
       @for (voter of objectKeys(votes); track voter) {
         <li class="list-group-item d-flex justify-content-between align-items-center vote-list-item">
           <span>{{ voter }}:</span>
-          @if (votes[voter] === "") {
+          @if (votes[voter].vote === "") {
             <fa-icon [icon]="faSquare"></fa-icon>
           } @else {
             <fa-icon [icon]="faCheckSquare"></fa-icon>
@@ -49,7 +53,13 @@
       @for (voter of objectKeys(sortedVotes); track voter) {
         <li class="list-group-item d-flex justify-content-between align-items-center vote-list-item">
           <span>{{ voter }}:</span>
-          <span>{{ votes[voter] }}</span>
+          <span>{{ votes[voter].vote }}</span>
+          @if (voter == userName){
+            <span><reaction-card (reactionSelected)="updateEmoji($event)"></reaction-card></span>
+          }
+          @else {
+            <span>{{ votes[voter].emoji }}</span>         
+          }
         </li>
       }
     </ul>

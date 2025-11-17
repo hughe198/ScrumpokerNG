@@ -6,6 +6,7 @@ import { Subject, Subscription, takeUntil, combineLatest } from 'rxjs';
 import { ApiService } from '../../api.service';
 import { ISettings } from '../../i-settings';
 import { getVoteByName, VoteName } from '../vote-types';
+import { ThemeService } from '../../theme.service';
 
 interface Statistics {
   mean: number;
@@ -53,7 +54,7 @@ export class BarchartComponent implements OnInit, OnDestroy {
   settingsSub!: Subscription;
   settings!: ISettings;
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService, private themeService: ThemeService) {}
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -84,6 +85,13 @@ export class BarchartComponent implements OnInit, OnDestroy {
         console.log("Error loading data for bar chart", err);
       }
     });
+
+    // Listen for theme changes and update chart colors
+    this.themeService.currentTheme$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.updateChartTheme();
+      });
   }
 
   private updateChart(): void {
@@ -116,7 +124,7 @@ export class BarchartComponent implements OnInit, OnDestroy {
     // Count votes for each option (grouped by value/display string)
     for (const voteValue of Object.values(this.votes)) {
       // Find the matching vote option
-      const voteOption = voteOptions.find(option => option.value === voteValue);
+      const voteOption = voteOptions.find(option => option.value === voteValue.vote);
       
       if (voteOption) {
         const key = voteOption.value; // Use the value (display string) as the key for grouping
@@ -161,11 +169,11 @@ export class BarchartComponent implements OnInit, OnDestroy {
     const rates: number[] = [];
     for (const voteValue of Object.values(this.votes)) {
       // Skip coffee votes (value "Coffee" or "☕") as they're not estimation votes
-      if (voteValue === 'Coffee' || voteValue === '☕') {
+      if (voteValue.vote === 'Coffee' || voteValue.vote === '☕') {
         continue;
       }
       
-      const voteOption = voteOptions.find(option => option.value === voteValue);
+      const voteOption = voteOptions.find(option => option.value === voteValue.vote);
       if (voteOption) {
         rates.push(voteOption.rate);
       }
@@ -204,88 +212,88 @@ export class BarchartComponent implements OnInit, OnDestroy {
     this.statistics = { mean, median, mode, range };
   }
 
-  private detectVotingCamps(validVotes: string[]): VotingPattern {
-    if (!this.settings || validVotes.length === 0) {
-      return { camps: [], pattern: 'scattered', description: 'No valid votes to analyze' };
-    }
-
-    const voteType = getVoteByName(this.settings.votingCard as VoteName);
-    const voteOptions = voteType.selectedOptions().sort((a, b) => a.rate - b.rate);
-
-    // Count votes and create voting groups
-    const voteCounts: { [rate: number]: { count: number, value: string } } = {};
-    
-    for (const voteValue of validVotes) {
-      const voteOption = voteOptions.find(option => option.value === voteValue);
-      if (voteOption) {
-        if (!voteCounts[voteOption.rate]) {
-          voteCounts[voteOption.rate] = { count: 0, value: voteOption.value };
-        }
-        voteCounts[voteOption.rate].count++;
-      }
-    }
-
-    // Convert to VotingGroup array and sort by count (descending)
-    const allGroups: VotingGroup[] = Object.entries(voteCounts)
-      .map(([rate, data]) => ({
-        rate: Number(rate),
-        value: data.value,
-        count: data.count,
-        percentage: Math.round((data.count / validVotes.length) * 100)
-      }))
-      .sort((a, b) => b.count - a.count);
-
-    // Team size-based camp detection thresholds
-    const teamSize = validVotes.length;
-    let minCampSize: number;
-    let minCampPercentage: number;
-
-    if (teamSize <= 4) {
-      // Small teams: need 2+ people per camp
-      minCampSize = 2;
-      minCampPercentage = 0; // Percentage not relevant for small teams
-    } else if (teamSize <= 7) {
-      // Medium teams: need 2+ people OR 20%+ support per camp
-      minCampSize = 2;
-      minCampPercentage = 20;
-    } else {
-      // Large teams: need 15%+ support OR 2+ people per camp
-      minCampSize = 2;
-      minCampPercentage = 15;
-    }
-
-    // Filter groups that qualify as "camps"
-    const significantCamps = allGroups.filter(group => 
-      group.count >= minCampSize || group.percentage >= minCampPercentage
-    );
-
-    // Determine pattern based on number of significant camps
-    let pattern: VotingPattern['pattern'];
-    let description: string;
-
-    if (significantCamps.length === 0) {
-      pattern = 'scattered';
-      description = 'No significant voting groups formed';
-    } else if (significantCamps.length === 1) {
-      pattern = 'single';
-      description = `Single dominant group with ${significantCamps[0].percentage}% support`;
-    } else if (significantCamps.length === 2) {
-      pattern = 'twocamp';
-      description = `Two camps: ${significantCamps[0].percentage}% vs ${significantCamps[1].percentage}%`;
-    } else if (significantCamps.length === 3) {
-      pattern = 'threecamp';
-      description = `Three camps: ${significantCamps[0].percentage}% vs ${significantCamps[1].percentage}% vs ${significantCamps[2].percentage}%`;
-    } else {
-      pattern = 'scattered';
-      description = `${significantCamps.length} camps detected - highly fragmented`;
-    }
-
-    return {
-      camps: significantCamps,
-      pattern,
-      description
-    };
+private detectVotingCamps(validVotes: Array<{voter:string, vote:string, emoji:string}>): VotingPattern {
+  if (!this.settings || validVotes.length === 0) {
+    return { camps: [], pattern: 'scattered', description: 'No valid votes to analyze' };
   }
+
+  const voteType = getVoteByName(this.settings.votingCard as VoteName);
+  const voteOptions = voteType.selectedOptions().sort((a, b) => a.rate - b.rate);
+
+  // Count votes and create voting groups
+  const voteCounts: { [rate: number]: { count: number, value: string } } = {};
+  
+  for (const vote of validVotes) {
+    const voteOption = voteOptions.find(option => option.value === vote.vote);
+    if (voteOption) {
+      if (!voteCounts[voteOption.rate]) {
+        voteCounts[voteOption.rate] = { count: 0, value: voteOption.value };
+      }
+      voteCounts[voteOption.rate].count++;
+    }
+  }
+
+  // Convert to VotingGroup array and sort by count (descending)
+  const allGroups: VotingGroup[] = Object.entries(voteCounts)
+    .map(([rate, data]) => ({
+      rate: Number(rate),
+      value: data.value,
+      count: data.count,
+      percentage: Math.round((data.count / validVotes.length) * 100)
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  // Team size-based camp detection thresholds
+  const teamSize = validVotes.length;
+  let minCampSize: number;
+  let minCampPercentage: number;
+
+  if (teamSize <= 4) {
+    // Small teams: count single voters as camps too
+    minCampSize = 1;
+    minCampPercentage = 0; // Percentage not relevant for small teams
+  } else if (teamSize <= 7) {
+    // Medium teams: single voters count OR 15%+ support per camp
+    minCampSize = 1;
+    minCampPercentage = 15;
+  } else {
+    // Large teams: single voters count OR 10%+ support per camp
+    minCampSize = 1;
+    minCampPercentage = 10;
+  }
+
+  // Filter groups that qualify as "camps"
+  const significantCamps = allGroups.filter(group => 
+    group.count >= minCampSize || group.percentage >= minCampPercentage
+  );
+
+  // Determine pattern based on number of significant camps
+  let pattern: VotingPattern['pattern'];
+  let description: string;
+
+  if (significantCamps.length === 0) {
+    pattern = 'scattered';
+    description = 'No significant voting groups formed';
+  } else if (significantCamps.length === 1) {
+    pattern = 'single';
+    description = `Single dominant group with ${significantCamps[0].percentage}% support`;
+  } else if (significantCamps.length === 2) {
+    pattern = 'twocamp';
+    description = `Two camps: ${significantCamps[0].percentage}% vs ${significantCamps[1].percentage}%`;
+  } else if (significantCamps.length === 3) {
+    pattern = 'threecamp';
+    description = `Three camps: ${significantCamps[0].percentage}% vs ${significantCamps[1].percentage}% vs ${significantCamps[2].percentage}%`;
+  } else {
+    pattern = 'scattered';
+    description = `${significantCamps.length} camps detected - highly fragmented`;
+  }
+
+  return {
+    camps: significantCamps,
+    pattern,
+    description
+  };
+}
 
   // Enhanced comment system with multiple variants
   private readonly commentVariants = {
@@ -544,320 +552,290 @@ export class BarchartComponent implements OnInit, OnDestroy {
     return recommendation;
   }
 
-  private calculateConsensus(): void {
-    if (!this.settings || !this.votes || !this.settings.reveal) {
-      this.consensus = { level: 'Poor', recommendation: 'No data available', color: '#6c757d', consensusPercentage: 0, modePercentage: 0 };
-      return;
-    }
-
-    // Right then, let's bin the empty votes because they're about as useful as a chocolate teapot
-    const allVotes = Object.values(this.votes).filter(vote => vote && vote.trim() !== '');
-    
-    // Identify coffee votes (value "Coffee" or "☕") as non-votes - they're just wanting a brew break
-    const coffeeVotes = allVotes.filter(vote => vote === 'Coffee' || vote === '☕');
-    const validVotes = allVotes.filter(vote => vote !== 'Coffee' && vote !== '☕');
-    const totalValidVotes = validVotes.length;
-    const totalCoffeeVotes = coffeeVotes.length;
-    const totalAllVotes = allVotes.length;
-    
-    // Check for coffee break scenarios - when everyone's gagging for a brew
-    if (totalValidVotes === 0) {
-      if (totalCoffeeVotes === totalAllVotes && totalCoffeeVotes > 0) {
-        // Everyone voted for coffee - time for a proper break!
-        this.consensus = { 
-          level: 'Excellent', 
-          recommendation: `Perfect consensus - everyone's crying out for a coffee break! Time to down tools and put the kettle on (${totalCoffeeVotes} coffee votes)`, 
-          color: '#6f4e37', // Coffee brown color
-          consensusPercentage: 100, 
-          modePercentage: 100 
-        };
-      } else {
-        this.consensus = { level: 'Poor', recommendation: 'No valid votes cast yet', color: '#6c757d', consensusPercentage: 0, modePercentage: 0 };
-      }
-      return;
-    }
-
-    // Check if large proportion wants coffee break
-    const coffeePercentage = (totalCoffeeVotes / totalAllVotes) * 100;
-    if (coffeePercentage >= 50) {
-      // Half or more want coffee - that's a strong signal
-      this.consensus = { 
-        level: 'Good', 
-        recommendation: `${Math.round(coffeePercentage)}% of the team needs a coffee break - maybe address the caffeine crisis before estimating further`, 
-        color: '#6f4e37', // Coffee brown color
-        consensusPercentage: Math.round(coffeePercentage), 
-        modePercentage: Math.round(coffeePercentage)
-      };
-      return;
-    }
-
-    // With only two voters, can't really call it consensus unless they agree
-    if (totalValidVotes === 2) {
-      const uniqueVotes = [...new Set(validVotes)];
-      if (uniqueVotes.length === 1) {
-        // Both voted the same - that's consensus 
-        const twoVoterConsensusPattern: VotingPattern = { camps: [], pattern: 'single', description: 'Two-voter consensus' };
-        this.consensus = { 
-          level: 'Excellent', 
-          recommendation: this.generateRecommendation(twoVoterConsensusPattern, 'tiny', 'tiny', totalCoffeeVotes), 
-          color: '#28a745', 
-          consensusPercentage: 100, 
-          modePercentage: 100 
-        };
-      } else {
-        // They disagree - no consensus possible
-        const twoVoterDisagreementPattern: VotingPattern = { camps: [], pattern: 'scattered', description: 'Two-voter disagreement' };
-        this.consensus = { 
-          level: 'Poor', 
-          recommendation: this.generateRecommendation(twoVoterDisagreementPattern, 'huge', 'huge', totalCoffeeVotes), 
-          color: '#dc3545', 
-          consensusPercentage: 0, 
-          modePercentage: 50 
-        };
-      }
-      return;
-    }
-
-    const voteType = getVoteByName(this.settings.votingCard as VoteName);
-    const voteOptions = voteType.selectedOptions().sort((a, b) => a.rate - b.rate);
-
-    // Time to tally up votes like we're counting beans at the local parish fête
-    const voteCounts: { [rate: number]: number } = {};
-    const votePositions: { [rate: number]: number } = {};
-    
-    voteOptions.forEach((option, index) => {
-      votePositions[option.rate] = index;
-    });
-
-    for (const voteValue of validVotes) {
-      const voteOption = voteOptions.find(option => option.value === voteValue);
-      if (voteOption) {
-        voteCounts[voteOption.rate] = (voteCounts[voteOption.rate] || 0) + 1;
-      }
-    }
-
-    // Sort by votes received - basically a popularity contest at the office Christmas do
-    const sortedVotes = Object.entries(voteCounts)
-      .map(([rate, count]) => ({ rate: Number(rate), count }))
-      .sort((a, b) => b.count - a.count);
-
-    // Time to measure just how spectacularly everyone disagrees
-    const allVotedRates = Object.keys(voteCounts).map(Number);
-    
-    // 1. How scattered is this motley crew?
-    const teamMinRate = Math.min(...allVotedRates);
-    const teamMaxRate = Math.max(...allVotedRates);
-    const teamRatio = teamMaxRate / teamMinRate;
-
-    // 2. What the majority reckon (with a cheeky look at the third wheel)
-    let cumulativeCount = 0;
-    const coreVotes = [];
-    
-    // Keep adding votes until we've captured 70% of the rabble
-    for (const vote of sortedVotes) {
-      cumulativeCount += vote.count;
-      coreVotes.push(vote);
-      if (cumulativeCount / totalValidVotes >= 0.70) break;
-    }
-    
-    // If there's a third option with more than one mate backing it, might as well let it join the party
-    if (coreVotes.length === 2 && sortedVotes[2] && sortedVotes[2].count > 1) {
-      coreVotes.push(sortedVotes[2]);
-    }
-    
-    const coreRates = coreVotes.map(v => v.rate);
-    const coreMinRate = Math.min(...coreRates);
-    const coreMaxRate = Math.max(...coreRates);
-    const coreRatio = coreRates.length > 1 ? coreMaxRate / coreMinRate : 1;
-
-    // How many steps apart are we in the sequence? (Matters more than you'd think)
-    const votedPositions = allVotedRates.map(rate => votePositions[rate]);
-    const positionRange = Math.max(...votedPositions) - Math.min(...votedPositions);
-
-    const topVote = sortedVotes[0];
-    const secondVote = sortedVotes[1] || { rate: 0, count: 0 };
-    const topPercentage = Math.round((topVote.count / totalValidVotes) * 100);
-    const combinedTopTwoPercentage = Math.round(((topVote.count + (secondVote.count || 0)) / totalValidVotes) * 100);
-
-    // Let's grade the level of chaos on our patented disagreement scale
-    const classifyRange = (ratio: number): 'tiny' | 'small' | 'moderate' | 'large' | 'huge' => {
-      if (ratio <= 1.5) return 'tiny';        // "Practically identical, innit"
-      if (ratio <= 3) return 'small';         // "Near enough for government work"
-      if (ratio <= 6) return 'moderate';      // "Getting somewhere now"
-      if (ratio <= 15) return 'large';        // "Worlds apart, these are"
-      return 'huge';                          // "Might as well be on different planets"
-    };
-
-    const teamRangeMagnitude = classifyRange(teamRatio);
-    const coreRangeMagnitude = classifyRange(coreRatio);
-
-    // Detect voting camps for enhanced commentary
-    const votingPattern = this.detectVotingCamps(validVotes);
-
-    // Right, let's see how much consensus we can pretend exists
-    let baseConsensusPercentage: number;
-    let baseLevel: 'Excellent' | 'Good' | 'Fair' | 'Poor';
-    let coreDescription: string;
-
-    // Blimey, everyone actually agrees? Mark this date in the calendar
-    if (positionRange === 0) {
-      const perfectConsensusPattern: VotingPattern = { camps: [], pattern: 'single', description: 'Perfect consensus' };
-      this.consensus = {
-        level: 'Excellent',
-        recommendation: this.generateRecommendation(perfectConsensusPattern, 'tiny', 'tiny', totalCoffeeVotes),
-        color: '#28a745',
-        consensusPercentage: 100,
-        modePercentage: 100
-      };
-      return;
-    }
-
-    // Time to assess just how much agreement we can squeeze out of this lot
-    
-    // First check: Is there actually any meaningful winner? (minimum 40% threshold)
-    if (topPercentage < 40) {
-      // No clear winner - everyone's scattered about
-      if (positionRange <= 2) {
-        baseConsensusPercentage = 35;
-        baseLevel = 'Fair';
-        coreDescription = 'Everyone disagrees but at least they\'re in the same ballpark';
-      } else if (positionRange <= 4) {
-        baseConsensusPercentage = 25;
-        baseLevel = 'Poor';
-        coreDescription = 'No clear winner in this free-for-all';
-      } else {
-        baseConsensusPercentage = 15;
-        baseLevel = 'Poor';
-        coreDescription = 'Complete chaos with no discernible pattern';
-      }
-    }
-    // There's a meaningful winner (40%+ support)
-    else if (positionRange <= 2) {
-      if (topPercentage >= 60) {
-        baseConsensusPercentage = 90;
-        baseLevel = 'Excellent';
-        coreDescription = 'Team actually agrees on something';
-      } else if (combinedTopTwoPercentage >= 70) {
-        baseConsensusPercentage = 80;
-        baseLevel = 'Good';
-        coreDescription = 'Decent agreement between the main factions';
-      } else {
-        baseConsensusPercentage = 65;
-        baseLevel = 'Good';
-        coreDescription = 'Reasonable clustering, could be worse';
-      }
-    } else if (positionRange <= 4) {
-      if (topPercentage >= 50) {
-        baseConsensusPercentage = 75;
-        baseLevel = 'Good';
-        coreDescription = 'One option managed to rise above the rabble';
-      } else if (combinedTopTwoPercentage >= 60) {
-        baseConsensusPercentage = 60;
-        baseLevel = 'Fair';
-        coreDescription = 'Proper split between the leading contenders';
-      } else {
-        baseConsensusPercentage = 45;
-        baseLevel = 'Fair';
-        coreDescription = 'Votes scattered like autumn leaves';
-      }
-    } else {
-      if (topPercentage >= 60) {
-        baseConsensusPercentage = 50;
-        baseLevel = 'Fair';
-        coreDescription = 'One brave soul trying to lead this shambles';
-      } else {
-        baseConsensusPercentage = 25;
-        baseLevel = 'Poor';
-        coreDescription = 'Complete and utter pandemonium';
-      }
-    }
-
-    // How far apart are the main players? Time for some penalties, I'm afraid
-    let coreRangeModifier = '';
-    let corePenalty = 0;
-
-    switch (coreRangeMagnitude) {
-      case 'tiny':
-        coreRangeModifier = ' (practically carbon copies)';
-        break;
-      case 'small':
-        coreRangeModifier = ' (close enough to call it a day)';
-        corePenalty = 2;
-        break;
-      case 'moderate':
-        coreRangeModifier = ' (with a bit of healthy disagreement)';
-        corePenalty = 8;
-        break;
-      case 'large':
-        coreRangeModifier = ' (despite talking completely different languages)';
-        corePenalty = 15;
-        if (baseLevel === 'Excellent') baseLevel = 'Good';
-        break;
-      case 'huge':
-        coreRangeModifier = ' (somehow spanning the Grand Canyon of disagreement)';
-        corePenalty = 25;
-        if (baseLevel === 'Excellent') baseLevel = 'Good';
-        else if (baseLevel === 'Good') baseLevel = 'Fair';
-        break;
-    }
-
-    // Right, how scattered is the whole bleeding team? More penalties incoming
-    let teamRangeModifier = '';
-    let teamPenalty = 0;
-    let discussionNeeded = 'crack on';
-
-    switch (teamRangeMagnitude) {
-      case 'tiny':
-        teamRangeModifier = '';
-        discussionNeeded = 'crack on'; // Miraculous, really
-        break;
-      case 'small':
-        teamRangeModifier = '';
-        discussionNeeded = 'quick word should do it'; // Living the dream
-        break;
-      case 'moderate':
-        teamRangeModifier = ' with a few stragglers wandering off';
-        teamPenalty = 5;
-        discussionNeeded = 'brief chinwag required';
-        break;
-      case 'large':
-        teamRangeModifier = ' but some are clearly living in cloud cuckoo land';
-        teamPenalty = 15;
-        discussionNeeded = 'time to herd the cats';
-        if (baseLevel === 'Excellent' && coreRangeMagnitude !== 'tiny') baseLevel = 'Good';
-        break;
-      case 'huge':
-        teamRangeModifier = ' but everyone might as well be in different postcodes';
-        teamPenalty = 25;
-        discussionNeeded = 'emergency powwow needed';
-        if (baseLevel === 'Excellent') baseLevel = 'Fair';
-        else if (baseLevel === 'Good' && (coreRangeMagnitude === 'large' || coreRangeMagnitude === 'huge')) baseLevel = 'Fair';
-        break;
-    }
-
-    // Final tally - optimism minus harsh reality
-    const consensusPercentage = Math.max(10, baseConsensusPercentage - corePenalty - teamPenalty);
-
-    // Use enhanced comment system for better variety and camp-aware recommendations
-    const recommendation = this.generateRecommendation(votingPattern, teamRangeMagnitude, coreRangeMagnitude, totalCoffeeVotes);
-
-    // Choose the appropriate shade of concern
-    let color: string;
-    switch (baseLevel) {
-      case 'Excellent': color = '#28a745'; break; // Green like a lovely spring day
-      case 'Good': color = '#17a2b8'; break;       // Blue like the sky on that one sunny day we had
-      case 'Fair': color = '#ffc107'; break;       // Yellow like a warning triangle
-      case 'Poor': color = '#dc3545'; break;       // Red like a proper emergency
-    }
-
-    this.consensus = {
-      level: baseLevel,
-      recommendation,
-      color,
-      consensusPercentage,
-      modePercentage: topPercentage
-    };
+private calculateConsensus(): void {
+  if (!this.settings || !this.votes || !this.settings.reveal) {
+    this.consensus = { level: 'Poor', recommendation: 'No data available', color: '#6c757d', consensusPercentage: 0, modePercentage: 0 };
+    return;
   }
+
+  // Right then, let's bin the empty votes because they're about as useful as a chocolate teapot
+  const allVotes = Object.values(this.votes).filter(vote => vote.vote && vote.vote.trim() !== '');
+  
+  // Identify coffee votes (value "Coffee" or "☕") as non-votes - they're just wanting a brew break
+  const coffeeVotes = allVotes.filter(vote => vote.vote === 'Coffee' || vote.vote === '☕');
+  const validVotes = allVotes.filter(vote => vote.vote !== 'Coffee' && vote.vote !== '☕');
+  const totalValidVotes = validVotes.length;
+  const totalCoffeeVotes = coffeeVotes.length;
+  const totalAllVotes = allVotes.length;
+  
+  // Check for coffee break scenarios - when everyone's gagging for a brew
+  if (totalValidVotes === 0) {
+    if (totalCoffeeVotes === totalAllVotes && totalCoffeeVotes > 0) {
+      // Everyone voted for coffee - time for a proper break!
+      this.consensus = { 
+        level: 'Excellent', 
+        recommendation: `Perfect consensus - everyone's crying out for a coffee break! Time to down tools and put the kettle on (${totalCoffeeVotes} coffee votes)`, 
+        color: '#6f4e37', // Coffee brown color
+        consensusPercentage: 100, 
+        modePercentage: 100 
+      };
+    } else {
+      this.consensus = { level: 'Poor', recommendation: 'No valid votes cast yet', color: '#6c757d', consensusPercentage: 0, modePercentage: 0 };
+    }
+    return;
+  }
+
+  // Check if large proportion wants coffee break
+  const coffeePercentage = (totalCoffeeVotes / totalAllVotes) * 100;
+  if (coffeePercentage >= 50) {
+    // Half or more want coffee - that's a strong signal
+    this.consensus = { 
+      level: 'Good', 
+      recommendation: `${Math.round(coffeePercentage)}% of the team needs a coffee break - maybe address the caffeine crisis before estimating further`, 
+      color: '#6f4e37', // Coffee brown color
+      consensusPercentage: Math.round(coffeePercentage), 
+      modePercentage: Math.round(coffeePercentage)
+    };
+    return;
+  }
+
+  // With only two voters, can't really call it consensus unless they agree
+  if (totalValidVotes === 2) {
+    const uniqueVotes = [...new Set(validVotes.map(v => v.vote))];
+    if (uniqueVotes.length === 1) {
+      // Both voted the same - that's consensus 
+      const twoVoterConsensusPattern: VotingPattern = { camps: [], pattern: 'single', description: 'Two-voter consensus' };
+      this.consensus = { 
+        level: 'Excellent', 
+        recommendation: this.generateRecommendation(twoVoterConsensusPattern, 'tiny', 'tiny', totalCoffeeVotes), 
+        color: '#28a745', 
+        consensusPercentage: 100, 
+        modePercentage: 100 
+      };
+      return;
+    } else {
+      // They disagree - no consensus possible
+      const twoVoterDisagreementPattern: VotingPattern = { camps: [], pattern: 'twocamp', description: 'Two-voter disagreement' };
+      this.consensus = { 
+        level: 'Poor', 
+        recommendation: this.generateRecommendation(twoVoterDisagreementPattern, 'huge', 'huge', totalCoffeeVotes), 
+        color: '#dc3545', 
+        consensusPercentage: 0, 
+        modePercentage: 50 
+      };
+      return;
+    }
+  }
+
+  const voteType = getVoteByName(this.settings.votingCard as VoteName);
+  const voteOptions = voteType.selectedOptions().sort((a, b) => a.rate - b.rate);
+
+  // Time to tally up votes like we're counting beans at the local parish fête
+  const voteCounts: { [rate: number]: number } = {};
+  const votePositions: { [rate: number]: number } = {};
+  
+  voteOptions.forEach((option, index) => {
+    votePositions[option.rate] = index;
+  });
+
+  for (const voteValue of validVotes) {
+    const voteOption = voteOptions.find(option => option.value === voteValue.vote);
+    if (voteOption) {
+      voteCounts[voteOption.rate] = (voteCounts[voteOption.rate] || 0) + 1;
+    }
+  }
+
+  // Sort by votes received - basically a popularity contest at the office Christmas do
+  const sortedVotes = Object.entries(voteCounts)
+    .map(([rate, count]) => ({ rate: Number(rate), count }))
+    .sort((a, b) => b.count - a.count);
+
+  // Time to measure just how spectacularly everyone disagrees
+  const allVotedRates = Object.keys(voteCounts).map(Number);
+  
+  // 1. How scattered is this motley crew?
+  const teamMinRate = Math.min(...allVotedRates);
+  const teamMaxRate = Math.max(...allVotedRates);
+  const teamRatio = teamMaxRate / teamMinRate;
+
+  // 2. What the majority reckon (with a cheeky look at the third wheel)
+  let cumulativeCount = 0;
+  const coreVotes = [];
+  
+  // Keep adding votes until we've captured 70% of the rabble
+  for (const vote of sortedVotes) {
+    cumulativeCount += vote.count;
+    coreVotes.push(vote);
+    if (cumulativeCount / totalValidVotes >= 0.70) break;
+  }
+  
+  // If there's a third option with more than one mate backing it, might as well let it join the party
+  if (coreVotes.length === 2 && sortedVotes[2] && sortedVotes[2].count > 1) {
+    coreVotes.push(sortedVotes[2]);
+  }
+  
+  const coreRates = coreVotes.map(v => v.rate);
+  const coreMinRate = Math.min(...coreRates);
+  const coreMaxRate = Math.max(...coreRates);
+  const coreRatio = coreRates.length > 1 ? coreMaxRate / coreMinRate : 1;
+
+  // How many steps apart are we in the sequence? (Matters more than you'd think)
+  const votedPositions = allVotedRates.map(rate => votePositions[rate]);
+  const positionRange = Math.max(...votedPositions) - Math.min(...votedPositions);
+
+  const topVote = sortedVotes[0];
+  const secondVote = sortedVotes[1] || { rate: 0, count: 0 };
+  const topPercentage = Math.round((topVote.count / totalValidVotes) * 100);
+  const combinedTopTwoPercentage = Math.round(((topVote.count + (secondVote.count || 0)) / totalValidVotes) * 100);
+
+  // Let's grade the level of chaos on our patented disagreement scale
+  const classifyRange = (ratio: number): 'tiny' | 'small' | 'moderate' | 'large' | 'huge' => {
+    if (ratio <= 1.5) return 'tiny';        // "Practically identical, innit"
+    if (ratio <= 3) return 'small';         // "Near enough for government work"
+    if (ratio <= 6) return 'moderate';      // "Getting somewhere now"
+    if (ratio <= 15) return 'large';        // "Worlds apart, these are"
+    return 'huge';                          // "Might as well be on different planets"
+  };
+
+  const teamRangeMagnitude = classifyRange(teamRatio);
+  const coreRangeMagnitude = classifyRange(coreRatio);
+
+  // Detect voting camps for enhanced commentary
+  const votingPattern = this.detectVotingCamps(validVotes);
+
+  // Right, let's see how much consensus we can pretend exists
+  let baseConsensusPercentage: number;
+  let baseLevel: 'Excellent' | 'Good' | 'Fair' | 'Poor';
+
+  // Blimey, everyone actually agrees? Mark this date in the calendar
+  if (positionRange === 0) {
+    const perfectConsensusPattern: VotingPattern = { camps: [], pattern: 'single', description: 'Perfect consensus' };
+    this.consensus = {
+      level: 'Excellent',
+      recommendation: this.generateRecommendation(perfectConsensusPattern, 'tiny', 'tiny', totalCoffeeVotes),
+      color: '#28a745',
+      consensusPercentage: 100,
+      modePercentage: 100
+    };
+    return;
+  }
+
+  // Time to assess just how much agreement we can squeeze out of this lot
+  
+  // First check: Is there actually any meaningful winner? (minimum 40% threshold)
+  if (topPercentage < 40) {
+    // No clear winner - everyone's scattered about
+    if (positionRange <= 2) {
+      baseConsensusPercentage = 35;
+      baseLevel = 'Fair';
+    } else if (positionRange <= 4) {
+      baseConsensusPercentage = 25;
+      baseLevel = 'Poor';
+    } else {
+      baseConsensusPercentage = 15;
+      baseLevel = 'Poor';
+    }
+  }
+  // There's a meaningful winner (40%+ support)
+  else if (positionRange <= 2) {
+    if (topPercentage >= 60) {
+      baseConsensusPercentage = 90;
+      baseLevel = 'Excellent';
+    } else if (combinedTopTwoPercentage >= 70) {
+      baseConsensusPercentage = 80;
+      baseLevel = 'Good';
+    } else {
+      baseConsensusPercentage = 65;
+      baseLevel = 'Good';
+    }
+  } else if (positionRange <= 4) {
+    if (topPercentage >= 50) {
+      baseConsensusPercentage = 75;
+      baseLevel = 'Good';
+    } else if (combinedTopTwoPercentage >= 60) {
+      baseConsensusPercentage = 60;
+      baseLevel = 'Fair';
+    } else {
+      baseConsensusPercentage = 45;
+      baseLevel = 'Fair';
+    }
+  } else {
+    if (topPercentage >= 60) {
+      baseConsensusPercentage = 50;
+      baseLevel = 'Fair';
+    } else {
+      baseConsensusPercentage = 25;
+      baseLevel = 'Poor';
+    }
+  }
+
+  // How far apart are the main players? Time for some penalties, I'm afraid
+  let corePenalty = 0;
+
+  switch (coreRangeMagnitude) {
+    case 'tiny':
+      break;
+    case 'small':
+      corePenalty = 2;
+      break;
+    case 'moderate':
+      corePenalty = 8;
+      break;
+    case 'large':
+      corePenalty = 15;
+      if (baseLevel === 'Excellent') baseLevel = 'Good';
+      break;
+    case 'huge':
+      corePenalty = 25;
+      if (baseLevel === 'Excellent') baseLevel = 'Good';
+      else if (baseLevel === 'Good') baseLevel = 'Fair';
+      break;
+  }
+
+  // Right, how scattered is the whole bleeding team? More penalties incoming
+  let teamPenalty = 0;
+
+  switch (teamRangeMagnitude) {
+    case 'tiny':
+    case 'small':
+      break;
+    case 'moderate':
+      teamPenalty = 5;
+      break;
+    case 'large':
+      teamPenalty = 15;
+      if (baseLevel === 'Excellent' && coreRangeMagnitude !== 'tiny') baseLevel = 'Good';
+      break;
+    case 'huge':
+      teamPenalty = 25;
+      if (baseLevel === 'Excellent') baseLevel = 'Fair';
+      else if (baseLevel === 'Good' && (coreRangeMagnitude === 'large' || coreRangeMagnitude === 'huge')) baseLevel = 'Fair';
+      break;
+  }
+
+  // Final tally - optimism minus harsh reality
+  const consensusPercentage = Math.max(10, baseConsensusPercentage - corePenalty - teamPenalty);
+
+  // Use enhanced comment system for better variety and camp-aware recommendations
+  const recommendation = this.generateRecommendation(votingPattern, teamRangeMagnitude, coreRangeMagnitude, totalCoffeeVotes);
+
+  // Choose the appropriate shade of concern
+  let color: string;
+  switch (baseLevel) {
+    case 'Excellent': color = '#28a745'; break; // Green like a lovely spring day
+    case 'Good': color = '#17a2b8'; break;       // Blue like the sky on that one sunny day we had
+    case 'Fair': color = '#ffc107'; break;       // Yellow like a warning triangle
+    case 'Poor': color = '#dc3545'; break;       // Red like a proper emergency
+  }
+
+  this.consensus = {
+    level: baseLevel,
+    recommendation,
+    color,
+    consensusPercentage,
+    modePercentage: topPercentage
+  };
+}
 
   // Helper methods for template
   get formattedMean(): string {
@@ -888,8 +866,8 @@ export class BarchartComponent implements OnInit, OnDestroy {
       {
         label: 'Number of Voters',
         data: [],
-        backgroundColor: 'rgba(66, 99, 246, 0.7)',
-        borderColor: 'rgba(66, 99, 246, 1)',
+        backgroundColor: this.getThemeColors().backgroundColor,
+        borderColor: this.getThemeColors().borderColor,
         borderWidth: 1
       }
     ]
@@ -941,6 +919,66 @@ collapsed = {
 
 toggle(section: keyof typeof this.collapsed) {
   this.collapsed[section] = !this.collapsed[section];
+}
+
+private getThemeColors() {
+  const isDark = this.themeService.currentTheme === 'dark';
+  return {
+    backgroundColor: isDark ? 'rgba(108, 117, 125, 0.7)' : 'rgba(66, 99, 246, 0.7)',
+    borderColor: isDark ? 'rgba(108, 117, 125, 1)' : 'rgba(66, 99, 246, 1)',
+    textColor: isDark ? '#ffffff' : '#333333',
+    gridColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+  };
+}
+
+private updateChartTheme(): void {
+  const colors = this.getThemeColors();
+  
+  // Update dataset colors
+  if (this.barChartData.datasets[0]) {
+    this.barChartData.datasets[0].backgroundColor = colors.backgroundColor;
+    this.barChartData.datasets[0].borderColor = colors.borderColor;
+  }
+
+  // Update chart options with theme colors
+  this.barChartOptions = {
+    ...this.barChartOptions,
+    scales: {
+      ...this.barChartOptions.scales,
+      ['y']: {
+        ...this.barChartOptions.scales?.['y'],
+        ticks: {
+          ...this.barChartOptions.scales?.['y']?.ticks,
+          color: colors.textColor
+        },
+        grid: {
+          color: colors.gridColor
+        }
+      },
+      ['x']: {
+        ...this.barChartOptions.scales?.['x'],
+        ticks: {
+          color: colors.textColor
+        },
+        grid: {
+          color: colors.gridColor
+        },
+        title: {
+          ...this.barChartOptions.scales?.['x']?.title,
+          color: colors.textColor
+        }
+      }
+    },
+    plugins: {
+      ...this.barChartOptions.plugins,
+      legend: {
+        ...this.barChartOptions.plugins?.legend,
+        labels: {
+          color: colors.textColor
+        }
+      }
+    }
+  };
 }
 
 

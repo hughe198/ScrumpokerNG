@@ -1,0 +1,19 @@
+<div class="reaction-wrapper">
+  <button class ="reaction-toggle" (click)="togglePicker()">{{selectedEmoji}} React</button>
+  @if (showPicker) {
+    <div>
+    @for (emoji of emojis; track $index) {  
+      <span
+        class="reaction-emoji"
+        (click)="selectReaction(emoji)"
+        >{{emoji}}</span>
+    }
+    </div>
+  }
+
+
+
+
+
+
+</div>

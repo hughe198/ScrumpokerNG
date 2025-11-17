@@ -54,7 +54,7 @@
 
 /* Labels */
 .voting-card-text {
-  color: #000;
+  color: var(--bs-body-color);
   font-size: clamp(14px, 2.2vw, 28px);
 }
 

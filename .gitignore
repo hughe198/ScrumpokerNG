@@ -38,6 +38,12 @@ yarn-error.log
 testem.log
 /typings
 tasks.txt
+# Claude Code documentation
+CLAUDE.md
+
+# Git files
+.gitignore
+
 # System files
 .DS_Store
 Thumbs.db

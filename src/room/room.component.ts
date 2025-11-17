@@ -13,7 +13,8 @@ import {FontAwesomeModule} from '@fortawesome/angular-fontawesome'
 import { faCoffee } from '@fortawesome/free-solid-svg-icons';
 import { faCheckSquare } from '@fortawesome/free-solid-svg-icons';
 import { faSquare } from '@fortawesome/free-solid-svg-icons';
-
+import { ThemeToggleComponent } from '../app/theme-toggle/theme-toggle.component';
+import { ReactionCardComponent } from './reaction-card/reaction-card.component';
 import { ISettings } from '../i-settings';
 import {  Subject, take, takeUntil } from 'rxjs';
 import { ActivatedRoute, Route, Router } from '@angular/router';
@@ -22,7 +23,7 @@ import { BarchartComponent } from "./barchart/barchart.component";
 @Component({
   selector: 'app-room',
   standalone: true,
-  imports: [FormsModule, VotingCardComponent, FontAwesomeModule, BarchartComponent],
+  imports: [FormsModule, VotingCardComponent, FontAwesomeModule, BarchartComponent, ThemeToggleComponent, ReactionCardComponent],
   templateUrl: './room.component.html',
   styleUrl: './room.component.css'
 })
@@ -37,25 +38,10 @@ export class RoomComponent implements OnDestroy, OnInit {
   faSquare = faSquare
   active:boolean = false
   
-  private destroy$ = new Subject<void>();
-  
-  
-  // @Input()
-  // set connection(active: boolean) {
-  //   if (active) {
-  //     this.active = active
-  //     this.connectRoom()
-  //     const userDetails: IUserDetails | null = this.localstorage.getUserDetails()
-  //     this.name = userDetails!.voter
-  //   }
-  //   else{
-  //     this.active = false
-  //     console.log("RoomComponent: Disconnected");
-  //   }
-  // }
-  
-  voter: string = ""
+  private destroy$ = new Subject<void>(); 
+  userName: string = ""
   votes!: IVotes
+  emoji:string = ""
   results!: IResults
   settings: ISettings | null = null
   voteString: string = ""
@@ -75,7 +61,7 @@ export class RoomComponent implements OnDestroy, OnInit {
     
     if (this.roomId && userDetails?.voter){
       // User has both roomId and saved voter name - connect directly
-      this.voter = userDetails.voter;
+      this.userName = userDetails.voter;
       this.api.connect(this.roomId,userDetails.voter)
       this.connectRoom()
     } else if (this.roomId && !userDetails?.voter) {
@@ -85,14 +71,6 @@ export class RoomComponent implements OnDestroy, OnInit {
     })
 
     // Duplicate name handling is now in submitName() method
-
-
-
-
-
-
-
-
 
   }
   ngOnDestroy(): void {
@@ -126,7 +104,7 @@ export class RoomComponent implements OnDestroy, OnInit {
         this.sortedVotes = this.sortVotes(data.votes)
 
         Object.values(this.votes).forEach(vote =>{
-          if (vote != ""){
+          if (vote.vote != ""){
             cleared =false
           }
         })
@@ -162,7 +140,7 @@ apiSettings.subscribe({
 
   voted(value: string) {
     this.voteString = value
-    const vote: ISendVote = { voter: this.voter, vote: value}
+    const vote: ISendVote = { voter: this.userName, vote: value,emoji: this.emoji}
     this.api.sendVote(vote)
   }
   votingCardChange(card: string) {
@@ -196,11 +174,11 @@ sortVotes(data:IVotes):IVotes {
   const isDataNumeric = (val:string)=> !isNaN(Number(val)) && val.trim() !== ""
   
   var sortedData = Object.entries(data).sort(([,voteA],[,voteB])=>{
-    const aIsNum = isDataNumeric(voteA)
-    const bIsNum = isDataNumeric(voteB)
+    const aIsNum = isDataNumeric(voteA.vote)
+    const bIsNum = isDataNumeric(voteB.vote)
 
     if (aIsNum && bIsNum) return Number(voteA) - Number(voteB); // returns a value +ve means A before B and vice versa
-    if (!aIsNum && !bIsNum) return voteA.length - voteB.length
+    if (!aIsNum && !bIsNum) return voteA.vote.length - voteB.vote.length
     return aIsNum ? -1 : 1 //if it reaches here, one is a string, one a num, it sorts numbers hgher
   })
 
@@ -212,7 +190,7 @@ return sortedData.reduce<IVotes>((acc, [key, val]) => {
 }
 
 submitName():void{
-  const trimmedName = this.voter.trim()
+  const trimmedName = this.userName.trim()
   if (this.roomId && trimmedName){
     // Close modal and save details first
     this.showVoterModal = false;
@@ -227,7 +205,7 @@ submitName():void{
       if(isDuplicate){
         // Reopen modal and clear the name for re-entry
         this.showVoterModal = true;
-        this.voter = '';
+        this.userName = '';
         console.log("Duplicate name detected, please try another name");
       }
     });
@@ -246,8 +224,12 @@ exitRoom(){
   this.router.navigate([''])
 }
 
-
+updateEmoji(emoji:string){
+  this.emoji = emoji
+  const vote: ISendVote = { voter: this.userName, vote: this.voteString,emoji: this.emoji}
+  console.log(vote)
+  this.api.sendVote(vote)
 }
 
 
-
+}

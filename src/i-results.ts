@@ -6,5 +6,5 @@ export interface IResults {
 }
 
 export interface IVotes{
-    [key:string]:string;
+    [key:string]:{voter:string,vote:string,emoji:string};
 }

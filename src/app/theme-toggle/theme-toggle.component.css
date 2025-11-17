@@ -1,0 +1,17 @@
+.theme-icon {
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+.theme-text {
+  font-size: 0.875rem;
+}
+
+/* Smooth transition for icon changes */
+button {
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  transform: scale(1.05);
+}

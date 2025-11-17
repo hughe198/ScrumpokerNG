@@ -8,10 +8,11 @@ import { RoomComponent } from "../room/room.component";
 import { ApiService } from '../api.service';
 import { ICommand } from '../i-command';
 import { Router } from '@angular/router';
+import { ThemeToggleComponent } from '../app/theme-toggle/theme-toggle.component';
 @Component({
   selector: 'app-lobby',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, ThemeToggleComponent],
   templateUrl: './lobby.component.html',
   styleUrl: './lobby.component.css'
 })
