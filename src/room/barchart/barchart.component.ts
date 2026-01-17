@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { NgChartsModule} from 'ng2-charts';
 import { IResults, IVotes } from '../../i-results';
@@ -7,13 +7,8 @@ import { ApiService } from '../../api.service';
 import { ISettings } from '../../i-settings';
 import { getVoteByName, VoteName } from '../vote-types';
 import { ThemeService } from '../../theme.service';
+import {Statistics} from '../../i-statistics'
 
-interface Statistics {
-  mean: number;
-  median: number;
-  mode: number[];
-  range: number;
-}
 
 interface VotingGroup {
   rate: number;
@@ -49,7 +44,7 @@ export class BarchartComponent implements OnInit, OnDestroy {
   statistics: Statistics = { mean: 0, median: 0, mode: [], range: 0 };
   consensus: ConsensusInfo = { level: 'Poor', recommendation: '', color: '#6c757d', consensusPercentage: 0, modePercentage: 0 };
   private destroy$ = new Subject<void>();
-  
+  @Output() statsUpdated = new EventEmitter<Statistics>();
   votesSub!: Subscription;
   settingsSub!: Subscription;
   settings!: ISettings;
@@ -210,6 +205,7 @@ export class BarchartComponent implements OnInit, OnDestroy {
     const range = maxRate - minRate;
 
     this.statistics = { mean, median, mode, range };
+    this.statsUpdated.emit(this.statistics);
   }
 
 private detectVotingCamps(validVotes: Array<{voter:string, vote:string, emoji:string}>): VotingPattern {

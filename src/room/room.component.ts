@@ -20,6 +20,7 @@ import {  Subject, take, takeUntil } from 'rxjs';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { LobbyComponent } from '../lobby/lobby.component';
 import { BarchartComponent } from "./barchart/barchart.component";
+import { Statistics } from '../i-statistics';
 @Component({
   selector: 'app-room',
   standalone: true,
@@ -30,9 +31,6 @@ import { BarchartComponent } from "./barchart/barchart.component";
 
 
 export class RoomComponent implements OnDestroy, OnInit {
-
-
-
   faCoffee = faCoffee
   faCheckSquare = faCheckSquare
   faSquare = faSquare
@@ -48,13 +46,20 @@ export class RoomComponent implements OnDestroy, OnInit {
   userDetails: IUserDetails | null
   clearVotes = new Subject<void>()
   reveal:Boolean = false;
-  sortedVotes!:IVotes;
+  sortedVotes: { key: string, value: any }[] = [];
   roomId!:string | null;
   showVoterModal = false;
+  gongOfShame = false
+  setGong = false
+  gongPermissionGranted = false;
+  currentStats!:Statistics
+  private gongAudio!: HTMLAudioElement
   constructor(private cdr:ChangeDetectorRef, private api: ApiService, private localstorage: LocalStorageService, private route:ActivatedRoute, private router:Router) {
     this.userDetails = localstorage.getUserDetails()    
   }
   ngOnInit(): void {
+    this.gongAudio = new Audio('assets/sounds/gong.mp3');
+    this.gongAudio.volume = 1.0;
     this.route.paramMap.subscribe(params => {
       this.roomId = params.get('roomId')
       const userDetails = this.localstorage.getUserDetails();
@@ -90,33 +95,109 @@ export class RoomComponent implements OnDestroy, OnInit {
 
   }
 
+  enableGongSounds(){
+    this.gongAudio.volume = 0;
+    this.gongAudio.play().then(()=>{
+      this.gongAudio.pause();
+      this.gongAudio.currentTime =0
+      this.gongAudio.volume = 1.0
+      this.gongPermissionGranted = true
+      console.log("Gong sound permission granted")
+    }).catch(err =>{
+      console.warn("Sound permission denied",err)
+    })
+  }
+ 
+
+   setGongofShame(data: IResults): boolean {
+     let hasOtherVoters = false;
+     let allOthersVoted = true;
+     let youHaveNotVoted = false;
+     
+     Object.values(data.votes).forEach(votes => {
+       if (votes.voter !== this.userName) {
+         hasOtherVoters = true;
+         if (votes.vote === "") {
+           allOthersVoted = false;
+         }
+       }
+       if (votes.voter === this.userName && votes.vote === "") {
+         youHaveNotVoted = true;
+       }
+     });
+     
+     return hasOtherVoters && allOthersVoted && youHaveNotVoted;
+   }
+
+  toggleGong() {
+  this.setGong = !this.setGong;
+  
+  // If turning ON and permission not yet granted, request it
+  if (this.setGong && !this.gongPermissionGranted) {
+    this.enableGongSounds();
+  }
+  
+  // If turning OFF, stop any playing gong
+  if (!this.setGong) {
+    this.stopGong();
+  }
+}
+
+  triggerGong(){
+    if (!this.gongPermissionGranted) return
+    this.gongAudio.currentTime = 0
+    this.gongAudio.play().catch(err =>{console.warn("Failed to play gong",err)})
+    
+  }
+
+  stopGong(){
+    this.gongAudio.pause()
+    this.gongAudio.currentTime = 0
+  }
+
+
+
+
 
   connectRoom() {
   const apiVotesConnection = this.api.getVotes()
   .pipe(takeUntil(this.destroy$));
 
-  apiVotesConnection.subscribe({
-    next: (data: IResults) => {
-        this.results = data;
-        this.votes = data.votes;
-        var cleared:boolean = true
-        console.log(this.results)
-        this.sortedVotes = this.sortVotes(data.votes)
+apiVotesConnection.subscribe({
+  next: (data: IResults) => {
+    // 1. Update Data
+    this.results = data;
+    this.votes = data.votes;
+    
+    // 2. Handle Display Logic (Sorting)
+    this.sortedVotes = this.sortVotes(data.votes);
 
-        Object.values(this.votes).forEach(vote =>{
-          if (vote.vote != ""){
-            cleared =false
-          }
-        })
-        if (cleared){
-          this.clearVotes.next()
-        }
-        
-    },
-    complete: () => {
-        this.active = false; // Update UI state accordingly
+    // 3. Handle Sound Logic (Gong)
+    const currentGongState = this.setGongofShame(data);
+    // Only trigger gong on the "rising edge" (when it changes from false to true)
+    if (currentGongState && !this.gongOfShame) {
+      this.triggerGong();
+    }
+    this.gongOfShame = currentGongState;
+
+    // 4. Handle Clear Logic
+    const allVotesEmpty = Object.values(this.votes).every(v => v.vote === "");
+    if (allVotesEmpty) {
+      this.clearVotes.next();
+    }
+
+    // 5. Force UI Update for WebSocket message
+    this.cdr.markForCheck();
+  },
+  error: (err) => {
+    console.error('WebSocket Error:', err);
+    this.active = false;
   }
+  // complete: is omitted because the socket is an open stream
 });
+
+
+
 
 const apiSettings = this.api.getSettings()
   .pipe(takeUntil(this.destroy$));
@@ -154,39 +235,32 @@ apiSettings.subscribe({
   }
 
   revealClicked( ){
-    const revealButton = document.querySelector("#revealButton")
     const command:ICommand ={command:"Reveal_votes"}
     this.api.sendCommand(command)
-    this.sortedVotes = this.sortVotes(this.votes)
-    console.log(JSON.stringify(this.sortedVotes))
+
   }
 
   clearClicked(){
-    const command:ICommand ={command:"Clear_votes"}
+    var command:ICommand ={command:"Clear_votes"}
     this.api.sendCommand(command)
-    this.clearVotes.next();
-    this.revealClicked()
-    
+    command ={command:"Reveal_votes"}
+    this.api.sendCommand(command)
+    this.clearVotes.next();   
+
   }
 
-sortVotes(data:IVotes):IVotes {
-  // Is the voting data numeric, or text based- i.e number or t-shirt sizes
-  const isDataNumeric = (val:string)=> !isNaN(Number(val)) && val.trim() !== ""
-  
-  var sortedData = Object.entries(data).sort(([,voteA],[,voteB])=>{
-    const aIsNum = isDataNumeric(voteA.vote)
-    const bIsNum = isDataNumeric(voteB.vote)
+sortVotes(data: IVotes): any[] {
+  const isDataNumeric = (val: string) => !isNaN(Number(val)) && val.trim() !== "";
 
-    if (aIsNum && bIsNum) return Number(voteA) - Number(voteB); // returns a value +ve means A before B and vice versa
-    if (!aIsNum && !bIsNum) return voteA.vote.length - voteB.vote.length
-    return aIsNum ? -1 : 1 //if it reaches here, one is a string, one a num, it sorts numbers hgher
-  })
+  // Return the sorted array of entries
+  return Object.entries(data).sort(([, voteA], [, voteB]) => {
+    const aIsNum = isDataNumeric(voteA.vote);
+    const bIsNum = isDataNumeric(voteB.vote);
 
-// change array back into object and return
-return sortedData.reduce<IVotes>((acc, [key, val]) => {
-  acc[key] = val;
-  return acc;
-}, {});
+    if (aIsNum && bIsNum) return Number(voteA.vote) - Number(voteB.vote); 
+    if (!aIsNum && !bIsNum) return voteA.vote.length - voteB.vote.length;
+    return aIsNum ? -1 : 1;
+  }).map(([key, value]) => ({ key, value })); // Map to a friendly object format
 }
 
 submitName():void{
@@ -230,6 +304,12 @@ updateEmoji(emoji:string){
   console.log(vote)
   this.api.sendVote(vote)
 }
+
+handleStatsChange(stats:Statistics){
+  this.currentStats = stats
+
+}
+
 
 
 }

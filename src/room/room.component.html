@@ -1,8 +1,42 @@
 
   <!-- Theme toggle in top-right corner -->
-  <div class="position-fixed top-0 end-0 p-3" style="z-index: 1001;">
+  <div class="position-fixed top-0 end-0 p-3 d-flex align-items-center gap-3" style="z-index: 1001;">
     <app-theme-toggle></app-theme-toggle>
+    <div class="gong-container">
+    <button 
+      class="gong-switch" 
+      [class.active]="setGong && gongPermissionGranted"
+      [class.pending]="setGong && !gongPermissionGranted"
+      (click)="toggleGong()">
+      <span class="gong-label">
+        @if (!gongPermissionGranted && setGong) {
+          Click to Enable Sound
+        } @else if (setGong) {
+          Alarm ON
+        } @else {
+          Enable Gong of Shame
+        }
+      </span>
+    </button>
+    <div 
+      class="gong-indicator" 
+      [class.ringing]="gongOfShame && setGong && gongPermissionGranted" 
+      [class.active]="setGong && gongPermissionGranted"
+      [class.disabled]="!setGong">
+      <span class="indicator-text">
+        @if (gongOfShame && setGong && gongPermissionGranted) {
+          Ringing!
+        } @else if (setGong && gongPermissionGranted) {
+          Ready
+        } @else if (setGong && !gongPermissionGranted) {
+          Permission Needed
+        }
+      </span>
+    </div>
   </div>
+  
+
+</div>
 
   <div class="main-container" >
   
@@ -25,9 +59,10 @@
     [clearVotes]="clearVotes"
   ></app-voting-card>
 
+
+
   <!-- Vote Results -->
   <h5 class="text-center my-4">Vote Results</h5>
-
   @if (settings && !settings.reveal) {
     <ul class="list-group">
       @for (voter of objectKeys(votes); track voter) {
@@ -48,24 +83,37 @@
     </ul>
   }
 
-  @if (settings && settings.reveal) {
-    <ul class="list-group">
-      @for (voter of objectKeys(sortedVotes); track voter) {
-        <li class="list-group-item d-flex justify-content-between align-items-center vote-list-item">
-          <span>{{ voter }}:</span>
-          <span>{{ votes[voter].vote }}</span>
-          @if (voter == userName){
-            <span><reaction-card (reactionSelected)="updateEmoji($event)"></reaction-card></span>
-          }
-          @else {
-            <span>{{ votes[voter].emoji }}</span>         
-          }
-        </li>
-      }
-    </ul>
-  }
 
-  <!-- Bottom Buttons -->
+@if (settings && settings.reveal) {
+  <ul class="list-group">
+    @for (entry of sortedVotes; track entry.key) {
+      <li class="list-group-item vote-list-item">
+        <div class="row text-center align-items-center">
+          
+          <div class="col-4 fw-bold">
+            {{ entry.key }} </div>
+
+          <div class="col-4">
+            {{ entry.value.vote }} </div>
+
+          <div class="col-4">
+            @if (entry.key == userName) {
+              <reaction-card (reactionSelected)="updateEmoji($event)"></reaction-card>
+            }
+            @else {
+              {{ entry.value.emoji }}
+            }
+          </div>
+
+        </div>
+      </li>
+    }
+    <h5 class="text-center my-4">Mode: {{currentStats.mode}}</h5>
+  </ul>
+}
+
+
+ <!-- Bottom Buttons -->
   <div class="bottom-buttons mt-5">
     <!-- Left -->
     <div class="d-flex gap-2">
@@ -80,7 +128,12 @@
     </div>
   </div>
 
-<app-barchart></app-barchart>
+<app-barchart (statsUpdated)="handleStatsChange($event)"></app-barchart>
+
+
+
+</div>
+<app-barchart (statsUpdated)="handleStatsChange($event)"></app-barchart>
 
 
 

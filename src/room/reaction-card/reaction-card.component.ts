@@ -9,7 +9,7 @@ import { Component, EventEmitter, Output } from '@angular/core';
 export class ReactionCardComponent {
 
 @Output() reactionSelected = new EventEmitter<string>() 
-emojis = ['👍', '❤️', '😂', '😮', '😢', '😡', '💩'];
+emojis = ['👍', '❤️', '😂', '😮', '😢', '😡', '💩','🥳','🎉'];
 showPicker = false;
 selectedEmoji = ""
 

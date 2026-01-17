@@ -57,3 +57,94 @@
     padding: 0.4rem 0.6rem;
   }
 }
+/* Gong Container - More discrete */
+.gong-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+}
+
+/* Gong Switch Button - Compact */
+.gong-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.375rem;
+  background-color: transparent;
+  color: var(--bs-body-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.gong-switch:hover {
+  background-color: var(--bs-secondary-bg);
+}
+
+.gong-switch.active {
+  background-color: var(--bs-success-bg-subtle);
+  border-color: var(--bs-success);
+}
+
+.gong-switch.pending {
+  background-color: var(--bs-warning-bg-subtle);
+  border-color: var(--bs-warning);
+}
+
+.gong-icon {
+  font-size: 1rem;
+}
+
+.gong-label {
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+/* Gong Indicator - Minimal */
+.gong-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  background-color: transparent;
+  border: 1px solid transparent;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.gong-indicator.active {
+  color: var(--bs-success-text);
+}
+
+.gong-indicator.ringing {
+  color: var(--bs-danger-text);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.gong-indicator.disabled {
+  opacity: 0.5;
+  color: var(--bs-secondary-color);
+}
+
+.indicator-icon {
+  font-size: 1rem;
+}
+
+.indicator-text {
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+/* Subtle pulse animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}

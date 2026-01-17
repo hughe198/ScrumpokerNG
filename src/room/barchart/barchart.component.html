@@ -6,7 +6,7 @@
       <header class="panel-header" (click)="toggle('consensus')" role="button"
               [attr.aria-expanded]="!collapsed.consensus" tabindex="0"
               (keydown.enter)="toggle('consensus')" (keydown.space)="toggle('consensus')">
-        <h3>Team Consensus</h3>
+        <h3>Team Consensus: (Mode is {{statistics.mode}}) </h3>
         <span class="chevron" [class.rotate]="!collapsed.consensus">▾</span>
       </header>
       <div class="panel-body">
