@@ -249,18 +249,23 @@ apiSettings.subscribe({
 
   }
 
-sortVotes(data: IVotes): any[] {
+sortVotes(data: IVotes): { key: string, value: any }[] {
+  // Define weights for non-numeric votes so they sort logically
+  const weights: Record<string, number> = { 
+    "XXL": 100, "XL": 90, "L": 80, "M": 70, "S": 60, "XS": 50, "☕": 0, "?": -1 
+  };
+
   const isDataNumeric = (val: string) => !isNaN(Number(val)) && val.trim() !== "";
 
-  // Return the sorted array of entries
-  return Object.entries(data).sort(([, voteA], [, voteB]) => {
-    const aIsNum = isDataNumeric(voteA.vote);
-    const bIsNum = isDataNumeric(voteB.vote);
+  return Object.entries(data)
+    .sort(([, a], [, b]) => {
+      const valA = isDataNumeric(a.vote) ? Number(a.vote) : (weights[a.vote] || 0);
+      const valB = isDataNumeric(b.vote) ? Number(b.vote) : (weights[b.vote] || 0);
 
-    if (aIsNum && bIsNum) return Number(voteA.vote) - Number(voteB.vote); 
-    if (!aIsNum && !bIsNum) return voteA.vote.length - voteB.vote.length;
-    return aIsNum ? -1 : 1;
-  }).map(([key, value]) => ({ key, value })); // Map to a friendly object format
+      // Descending order: B - A
+      return valB - valA;
+    })
+    .map(([key, value]) => ({ key, value }));
 }
 
 submitName():void{
