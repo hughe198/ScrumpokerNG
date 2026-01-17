@@ -205,8 +205,8 @@ const apiSettings = this.api.getSettings()
 apiSettings.subscribe({
   next: (data: ISettings) => {
       this.settings = data;
-      this.reveal = this.settings.reveal
-
+      this.reveal = data.reveal
+      this.cdr.markForCheck();
   },
   complete: () => {
       console.log('Settings subscription completed');
