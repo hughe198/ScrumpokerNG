@@ -3,8 +3,8 @@
   <div class="position-fixed top-0 end-0 p-3 d-flex align-items-center gap-3" style="z-index: 1001;">
     <app-theme-toggle></app-theme-toggle>
     <div class="gong-container">
-    <button 
-      class="gong-switch" 
+    <button
+      class="gong-switch"
       [class.active]="setGong && gongPermissionGranted"
       [class.pending]="setGong && !gongPermissionGranted"
       (click)="toggleGong()">
@@ -18,9 +18,9 @@
         }
       </span>
     </button>
-    <div 
-      class="gong-indicator" 
-      [class.ringing]="gongOfShame && setGong && gongPermissionGranted" 
+    <div
+      class="gong-indicator"
+      [class.ringing]="gongOfShame && setGong && gongPermissionGranted"
       [class.active]="setGong && gongPermissionGranted"
       [class.disabled]="!setGong">
       <span class="indicator-text">
@@ -34,12 +34,12 @@
       </span>
     </div>
   </div>
-  
+
 
 </div>
 
   <div class="main-container" >
-  
+
     <!-- Voter Modal -->
     @if (showVoterModal) {
       <div class="modal-overlay position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex justify-content-center align-items-center z-3">
@@ -89,7 +89,7 @@
     @for (entry of sortedVotes; track entry.key) {
       <li class="list-group-item vote-list-item">
         <div class="row text-center align-items-center">
-          
+
           <div class="col-4 fw-bold">
             {{ entry.key }} </div>
 
@@ -133,8 +133,4 @@
 
 
 </div>
-<app-barchart (statsUpdated)="handleStatsChange($event)"></app-barchart>
-
-
-
 </div>
