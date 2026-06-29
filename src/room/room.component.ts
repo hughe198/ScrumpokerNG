@@ -35,8 +35,8 @@ export class RoomComponent implements OnDestroy, OnInit {
   faCheckSquare = faCheckSquare
   faSquare = faSquare
   active:boolean = false
-  
-  private destroy$ = new Subject<void>(); 
+
+  private destroy$ = new Subject<void>();
   userName: string = ""
   votes!: IVotes
   emoji:string = ""
@@ -53,9 +53,10 @@ export class RoomComponent implements OnDestroy, OnInit {
   setGong = false
   gongPermissionGranted = false;
   currentStats!:Statistics
+  isLoading : boolean = true
   private gongAudio!: HTMLAudioElement
   constructor(private cdr:ChangeDetectorRef, private api: ApiService, private localstorage: LocalStorageService, private route:ActivatedRoute, private router:Router) {
-    this.userDetails = localstorage.getUserDetails()    
+    this.userDetails = localstorage.getUserDetails()
   }
   ngOnInit(): void {
     this.gongAudio = new Audio('assets/sounds/gong.mp3');
@@ -63,7 +64,7 @@ export class RoomComponent implements OnDestroy, OnInit {
     this.route.paramMap.subscribe(params => {
       this.roomId = params.get('roomId')
       const userDetails = this.localstorage.getUserDetails();
-    
+
     if (this.roomId && userDetails?.voter){
       // User has both roomId and saved voter name - connect directly
       this.userName = userDetails.voter;
@@ -75,14 +76,12 @@ export class RoomComponent implements OnDestroy, OnInit {
     }
     })
 
-    // Duplicate name handling is now in submitName() method
-
   }
   ngOnDestroy(): void {
     this.disconnectRoom();
     console.log('RoomComponent Destroyed');
   }
-  
+
   disconnectRoom(){
     const command:ICommand = {command:"Exit_room"}
     this.api.sendCommand(command)
@@ -91,7 +90,7 @@ export class RoomComponent implements OnDestroy, OnInit {
     this.destroy$ = new Subject<void>()
     console.log('RoomComponent Destroyed');
     this.router.navigate(['/'])
-    
+
 
   }
 
@@ -107,13 +106,13 @@ export class RoomComponent implements OnDestroy, OnInit {
       console.warn("Sound permission denied",err)
     })
   }
- 
+
 
    setGongofShame(data: IResults): boolean {
      let hasOtherVoters = false;
      let allOthersVoted = true;
      let youHaveNotVoted = false;
-     
+
      Object.values(data.votes).forEach(votes => {
        if (votes.voter !== this.userName) {
          hasOtherVoters = true;
@@ -125,18 +124,18 @@ export class RoomComponent implements OnDestroy, OnInit {
          youHaveNotVoted = true;
        }
      });
-     
+
      return hasOtherVoters && allOthersVoted && youHaveNotVoted;
    }
 
   toggleGong() {
   this.setGong = !this.setGong;
-  
+
   // If turning ON and permission not yet granted, request it
   if (this.setGong && !this.gongPermissionGranted) {
     this.enableGongSounds();
   }
-  
+
   // If turning OFF, stop any playing gong
   if (!this.setGong) {
     this.stopGong();
@@ -147,7 +146,7 @@ export class RoomComponent implements OnDestroy, OnInit {
     if (!this.gongPermissionGranted) return
     this.gongAudio.currentTime = 0
     this.gongAudio.play().catch(err =>{console.warn("Failed to play gong",err)})
-    
+
   }
 
   stopGong(){
@@ -168,7 +167,7 @@ apiVotesConnection.subscribe({
     // 1. Update Data
     this.results = data;
     this.votes = data.votes;
-    
+
     // 2. Handle Display Logic (Sorting)
     this.sortedVotes = this.sortVotes(data.votes);
 
@@ -185,7 +184,6 @@ apiVotesConnection.subscribe({
     if (allVotesEmpty) {
       this.clearVotes.next();
     }
-
     // 5. Force UI Update for WebSocket message
     this.cdr.markForCheck();
   },
@@ -245,14 +243,14 @@ apiSettings.subscribe({
     this.api.sendCommand(command)
     command ={command:"Reveal_votes"}
     this.api.sendCommand(command)
-    this.clearVotes.next();   
+    this.clearVotes.next();
 
   }
 
 sortVotes(data: IVotes): { key: string, value: any }[] {
   // Define weights for non-numeric votes so they sort logically
-  const weights: Record<string, number> = { 
-    "XXL": 100, "XL": 90, "L": 80, "M": 70, "S": 60, "XS": 50, "☕": 0, "?": -1 
+  const weights: Record<string, number> = {
+    "XXL": 100, "XL": 90, "L": 80, "M": 70, "S": 60, "XS": 50, "☕": 0, "?": -1
   };
 
   const isDataNumeric = (val: string) => !isNaN(Number(val)) && val.trim() !== "";
@@ -278,7 +276,7 @@ submitName():void{
       roomID: this.roomId,
       votingCard: 'Standard'
     });
-    
+
     // Set up duplicate name handling
     const duplicateNameSub = this.api.getDuplicateNameObservable().pipe(take(1)).subscribe(isDuplicate => {
       if(isDuplicate){
@@ -288,7 +286,7 @@ submitName():void{
         console.log("Duplicate name detected, please try another name");
       }
     });
-    
+
     // Connect and set up room subscriptions
     this.api.connect(this.roomId, trimmedName);
     this.connectRoom();

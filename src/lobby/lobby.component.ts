@@ -19,7 +19,7 @@ import { ThemeToggleComponent } from '../app/theme-toggle/theme-toggle.component
 export class LobbyComponent implements OnInit {
 
   constructor(private localStorageService: LocalStorageService, private api:ApiService, private router:Router ) { }
-
+  isLoading: boolean = true;
   voter: string = ""
   roomID: string | null = null
   votingCard: string | null = null
@@ -83,8 +83,8 @@ export class LobbyComponent implements OnInit {
   }
 }
 
-  disconnect(){
-    this.api.requestDisconnect()
+  onBannerLoaded(): void {
+    this.isLoading = false;
   }
-  
+
 }

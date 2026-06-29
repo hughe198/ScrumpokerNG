@@ -19,10 +19,11 @@ import { Observable } from 'rxjs';
 export class VotingCardComponent implements OnInit {
 
   @Input() clearVotes!: Observable<void>;
-
   @Output() vote = new EventEmitter<string>
+  @Output() allImagesLoaded = new EventEmitter<void>();
+  private loadedImages = 0;
   selectedOption?: string
-  settings!:ISettings  
+  settings!:ISettings
   fibonacciCards = voteFibonacci
   linearCards = voteLinear
   tshirtsCards = voteTshirts
@@ -32,7 +33,7 @@ export class VotingCardComponent implements OnInit {
   currentVoteValue:string = ""
   votingCard = [this.standardVote,this.fibonacciCards,this.exponetialCards, this.linearCards, this.tshirtsCards]
   selectedOptions = this.standardVote.selectedOptions()
-  
+
   constructor(private localService: LocalStorageService, private api: ApiService) {
     const settings = api.getSettings()
     settings.subscribe((data)=>{
@@ -48,12 +49,13 @@ export class VotingCardComponent implements OnInit {
     this.clearVotes.subscribe(()=>{
       this.resetVoteCard()
     })
-    
+
   }
   onCardChange(card: Event) {
     const selectElement = card.target as HTMLSelectElement
     const selectCard = selectElement.value
     // console.log(selectCard)
+    this.loadedImages = 0
     if (selectCard) {
       const newCard = this.votingCard.find((x) => x.name === selectCard)
       this.selectedOptions = newCard!.selectedOptions()
@@ -61,17 +63,24 @@ export class VotingCardComponent implements OnInit {
       const card:ICardChange ={Card_Change:this.selectedOption}
       this.api.changeCards(card)
       this.localService.changeVotingCard(this.selectedOption)
+
     }
   }
 
+  onImageLoad() {
+    this.loadedImages++;
+    if (this.loadedImages >= this.selectedOptions.length) {
+      this.allImagesLoaded.emit();
+    }
+  }
   voteClicked(voteValue: string) {
     this.currentVoteValue =voteValue
     console.log(`Voted:${voteValue}`)
     this.toggleVoteButton(voteValue)
     this.vote.emit(voteValue)
-    
+
   }
-  
+
   toggleVoteButton(voteValue:string){
     const votebutton = document.querySelector(`#option-${voteValue}`) as HTMLElement
     const buttons = document.querySelectorAll(".votingOption")
@@ -92,7 +101,7 @@ export class VotingCardComponent implements OnInit {
     const buttons = document.querySelectorAll(".votingOption")
     buttons?.forEach(option => {
       if (option instanceof HTMLElement){
-          option.classList.remove("voteSelected")}    
-  
+          option.classList.remove("voteSelected")}
+
     })}
 }

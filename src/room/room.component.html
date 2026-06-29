@@ -37,8 +37,12 @@
 
 
 </div>
-
-  <div class="main-container" >
+  @if (isLoading) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+    </div>
+  }
+  <div class="main-container" [style.visibility]="isLoading ? 'hidden' : 'visible'" >
 
     <!-- Voter Modal -->
     @if (showVoterModal) {
@@ -54,7 +58,7 @@
 
   <!-- Voting Interface -->
   <app-voting-card
-    (userDetails)="userDetails"
+    (allImagesLoaded)="isLoading=false"
     (vote)="voted($event)"
     [clearVotes]="clearVotes"
   ></app-voting-card>

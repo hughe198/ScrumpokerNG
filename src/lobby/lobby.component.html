@@ -3,10 +3,15 @@
   <div class="position-fixed top-0 end-0 p-3" style="z-index: 1000;">
     <app-theme-toggle></app-theme-toggle>
   </div>
-  
-  <div class="row justify-content-center">
-    <img src="assets/banner.png" alt="Scrumpoker banner" class="centered-banner">
-
+  @if (isLoading) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+    </div>
+  }
+  <div class="row justify-content-center" [style.visibility]="isLoading ? 'hidden' : 'visible'">
+    <img src="assets/banner.png" alt="Scrumpoker banner" class="centered-banner"
+         (load)="onBannerLoaded()"
+         (error)="onBannerLoaded()">
     <div class="col-md-6">
       <!-- Join a Room card -->
       <div class="card shadow p-4">

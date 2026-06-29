@@ -19,7 +19,12 @@
         (keydown.enter)="voteClicked(option.value);"
         (keydown.space)="voteClicked(option.value);"
       >
-        <img [src]="option.icon" class="img-thumbnail square-img" />
+        <img
+          [src]="option.icon"
+          class="img-thumbnail square-img"
+          (load)="onImageLoad()"
+          (error)="onImageLoad()"
+        />
         <span class="voting-card-text">{{ option.value }}</span>
       </div>
     }
