@@ -65,12 +65,12 @@ export class RoomComponent implements OnDestroy, OnInit {
       this.roomId = params.get('roomId')
       const userDetails = this.localstorage.getUserDetails();
 
-    if (this.roomId && userDetails?.voter){
+    if (this.roomId && userDetails?.displayName){
       // User has both roomId and saved voter name - connect directly
-      this.userName = userDetails.voter;
-      this.api.connect(this.roomId,userDetails.voter)
+      this.userName = userDetails.displayName;
+      this.api.connect(this.roomId,userDetails.displayName)
       this.connectRoom()
-    } else if (this.roomId && !userDetails?.voter) {
+    } else if (this.roomId && !userDetails?.displayName) {
       // User has roomId but no saved voter name - show modal to enter name
       this.showVoterModal = true;
     }
@@ -272,7 +272,7 @@ submitName():void{
     // Close modal and save details first
     this.showVoterModal = false;
     this.localstorage.setUserDetails({
-      voter: trimmedName,
+      displayName: trimmedName,
       roomID: this.roomId,
       votingCard: 'Standard'
     });

@@ -1,3 +1,4 @@
 export interface ICardChange {
-    Card_Change: string
+    type: 'cardChange';
+    card: string;
 }

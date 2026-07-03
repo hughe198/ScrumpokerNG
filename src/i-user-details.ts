@@ -1,5 +1,6 @@
 export interface IUserDetails {
     roomID:string
-    voter:string
+    userID:string
+    displayName:string
     votingCard:string
 }

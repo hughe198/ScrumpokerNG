@@ -1,3 +1,6 @@
+export type CommandName = 'Clear_votes' | 'Delete_room' | 'Reveal_votes' | 'Exit_room';
+
 export interface ICommand {
-    command: string
+    type: 'command';
+    command: CommandName;
 }

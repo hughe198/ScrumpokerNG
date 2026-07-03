@@ -7,23 +7,23 @@ export class LocalStorageService {
 
   setUserDetails(details:IUserDetails): void {
   try {
-    if (!(details.roomID === null) && !(details.voter === null)){
+    if (!(details.roomID === null) && !(details.displayName === null)){
       localStorage.setItem("roomID",details.roomID)
-      localStorage.setItem("voter",details.voter)
+      localStorage.setItem("voter",details.displayName)
       localStorage.setItem("votingCard",details.votingCard)
     }
   } catch (error) {
     console.log("Error saving to localStorage",error)
   }
 }
-  
+
   getUserDetails():IUserDetails | null{
     const roomID = localStorage.getItem("roomID")
     const voter = localStorage.getItem("voter")
     const votingCard = localStorage.getItem("votingCard")
 
     if ((roomID !== null) && (voter !== null)&& (votingCard !== null)){
-      let details: IUserDetails = {roomID: roomID,voter:voter,votingCard:votingCard}
+      let details: IUserDetails = {roomID: roomID,displayName:voter,votingCard:votingCard}
       return details
     }
     return null
@@ -31,7 +31,7 @@ export class LocalStorageService {
   }
 
   changeVotingCard(change:string){
-    localStorage.setItem('votingCard',change)  
+    localStorage.setItem('votingCard',change)
   }
 
 

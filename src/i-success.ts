@@ -1,4 +1,4 @@
 export interface ISuccess {
-    type:"success";
+    type: 'success';
     success: string;
 }

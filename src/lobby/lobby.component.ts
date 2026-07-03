@@ -41,15 +41,15 @@ export class LobbyComponent implements OnInit {
     const local = this.localStorageService.getUserDetails()
     if (
           local &&
-          typeof local.voter === 'string' &&
-          local.voter.trim() !== '' &&
+          typeof local.displayName === 'string' &&
+          local.displayName.trim() !== '' &&
           typeof local.roomID === 'string' &&
           validator.isUUID(local.roomID) &&
           typeof local.votingCard === 'string' &&
           local.votingCard.trim() !== ''
         )
         {
-      this.voter = local.voter
+      this.voter = local.displayName
       this.roomID = local.roomID
       this.votingCard = local.votingCard
       this.localStorage = true
@@ -67,7 +67,7 @@ export class LobbyComponent implements OnInit {
   connect(voter: string, roomID: string | null, votingCard : string | null) {
     console.log("Connecting with:",this.roomID, this.voter)
     if (voter && roomID && votingCard && validator.isUUID(roomID)) {
-      var details: IUserDetails = { voter: voter, roomID: roomID, votingCard:votingCard}
+      var details: IUserDetails = { displayName: voter, roomID: roomID, votingCard:votingCard}
       this.localStorageService.setUserDetails(details)
       this.router.navigate(['/room',roomID])
     } else {
@@ -78,7 +78,7 @@ export class LobbyComponent implements OnInit {
   createNewRoom() {
     this.roomID = uuidv4()
     if (this.voter && this.roomID && this.votingCard && validator.isUUID(this.roomID)) {
-      const details: IUserDetails = { voter: this.voter, roomID: this.roomID, votingCard:this.votingCard}
+      const details: IUserDetails = {userID:"", displayName: this.voter, roomID: this.roomID, votingCard:this.votingCard}
       this.localStorageService.setUserDetails(details)
   }
 }

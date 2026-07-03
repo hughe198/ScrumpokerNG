@@ -1,10 +1,7 @@
-export interface IResults {
-    type:"result";
-    roomID:string;
-    votingCard:string;
-    votes:IVotes
-}
+import { IVoteRecord } from './i-vote';
 
-export interface IVotes{
-    [key:string]:{voter:string,vote:string,emoji:string};
+export interface IResults {
+    type: 'result';
+    roomID: string;
+    votes: { [voterId: string]: IVoteRecord };
 }
