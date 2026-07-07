@@ -1,13 +1,18 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { NgChartsModule} from 'ng2-charts';
-import { IResults, IVotes } from '../../i-results';
+import { IVoteRecord } from '../../i-vote';
 import { Subject, Subscription, takeUntil, combineLatest } from 'rxjs';
 import { ApiService } from '../../api.service';
 import { ISettings } from '../../i-settings';
 import { getVoteByName, VoteName } from '../vote-types';
 import { ThemeService } from '../../theme.service';
 import {Statistics} from '../../i-statistics'
+
+// IVotes was previously exported from i-results.ts; votes are now typed
+// inline there as { [voterId: string]: IVoteRecord }. Local alias so this
+// component doesn't need to repeat the map shape everywhere.
+type VotesMap = { [voterId: string]: IVoteRecord };
 
 
 interface VotingGroup {
@@ -40,7 +45,7 @@ interface ConsensusInfo {
 })
 export class BarchartComponent implements OnInit, OnDestroy {
   groupedVotes: Record<string, number> = {}; // Groups by value (display string)
-  votes: IVotes = {};
+  votes: VotesMap = {};
   statistics: Statistics = { mean: 0, median: 0, mode: [], range: 0 };
   consensus: ConsensusInfo = { level: 'Poor', recommendation: '', color: '#6c757d', consensusPercentage: 0, modePercentage: 0 };
   private destroy$ = new Subject<void>();
@@ -208,7 +213,7 @@ export class BarchartComponent implements OnInit, OnDestroy {
     this.statsUpdated.emit(this.statistics);
   }
 
-private detectVotingCamps(validVotes: Array<{voter:string, vote:string, emoji:string}>): VotingPattern {
+private detectVotingCamps(validVotes: Array<{voter:string, vote:string}>): VotingPattern {
   if (!this.settings || validVotes.length === 0) {
     return { camps: [], pattern: 'scattered', description: 'No valid votes to analyze' };
   }

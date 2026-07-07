@@ -6,7 +6,6 @@ import { FormsModule } from '@angular/forms';
 import validator from 'validator'
 import { RoomComponent } from "../room/room.component";
 import { ApiService } from '../api.service';
-import { ICommand } from '../i-command';
 import { Router } from '@angular/router';
 import { ThemeToggleComponent } from '../app/theme-toggle/theme-toggle.component';
 @Component({
@@ -67,7 +66,7 @@ export class LobbyComponent implements OnInit {
   connect(voter: string, roomID: string | null, votingCard : string | null) {
     console.log("Connecting with:",this.roomID, this.voter)
     if (voter && roomID && votingCard && validator.isUUID(roomID)) {
-      var details: IUserDetails = { displayName: voter, roomID: roomID, votingCard:votingCard}
+      var details: IUserDetails = { userID: "", displayName: voter, roomID: roomID, votingCard:votingCard}
       this.localStorageService.setUserDetails(details)
       this.router.navigate(['/room',roomID])
     } else {

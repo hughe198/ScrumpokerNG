@@ -6,6 +6,7 @@ import { ISendSettingsUpdate, ISettings } from './i-settings';
 import { IResults } from './i-results';
 import { IError } from './i-error';
 import { ISuccess } from './i-success';
+import { IJoined } from './i-joined';
 
 // Everything the client ever sends into the dispatch loop (post-handshake).
 // IJoinRoom is deliberately excluded -- it's the one-off first message,
@@ -19,6 +20,7 @@ export type ClientMessage =
 
 // Everything the server ever sends back.
 export type ServerMessage =
+    | IJoined
     | IResults
     | ISettings
     | IError

@@ -1,10 +1,9 @@
-
 import { ApiService } from '../api.service';
 import { LocalStorageService } from '../local-storage.service';
 import { IUserDetails } from '../i-user-details';
-import { IResults, IVotes } from '../i-results';
-import { ISendVote as ISendVote } from '../i-send-votes';
-import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { IResults } from '../i-results';
+import { IVoteRecord, ISendVote } from '../i-vote';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { VotingCardComponent } from "./voting-card/voting-card.component";
 import { ICardChange } from '../i-card-change';
@@ -14,17 +13,21 @@ import { faCoffee } from '@fortawesome/free-solid-svg-icons';
 import { faCheckSquare } from '@fortawesome/free-solid-svg-icons';
 import { faSquare } from '@fortawesome/free-solid-svg-icons';
 import { ThemeToggleComponent } from '../app/theme-toggle/theme-toggle.component';
-import { ReactionCardComponent } from './reaction-card/reaction-card.component';
 import { ISettings } from '../i-settings';
 import {  Subject, take, takeUntil } from 'rxjs';
-import { ActivatedRoute, Route, Router } from '@angular/router';
-import { LobbyComponent } from '../lobby/lobby.component';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BarchartComponent } from "./barchart/barchart.component";
 import { Statistics } from '../i-statistics';
+
+// IVotes was previously exported from i-results.ts; votes are now typed
+// inline there as { [voterId: string]: IVoteRecord }. Local alias so the
+// rest of this component doesn't need to repeat the map shape everywhere.
+type VotesMap = { [voterId: string]: IVoteRecord };
+
 @Component({
   selector: 'app-room',
   standalone: true,
-  imports: [FormsModule, VotingCardComponent, FontAwesomeModule, BarchartComponent, ThemeToggleComponent, ReactionCardComponent],
+  imports: [FormsModule, VotingCardComponent, FontAwesomeModule, BarchartComponent, ThemeToggleComponent],
   templateUrl: './room.component.html',
   styleUrl: './room.component.css'
 })
@@ -38,8 +41,11 @@ export class RoomComponent implements OnDestroy, OnInit {
 
   private destroy$ = new Subject<void>();
   userName: string = ""
-  votes!: IVotes
-  emoji:string = ""
+  // Server-assigned id for this connection, received via the "joined"
+  // message. Votes/reactions are keyed by this, not by display name --
+  // see setGongofShame() and voted() below.
+  myVoterID: string | null = null
+  votes!: VotesMap
   results!: IResults
   settings: ISettings | null = null
   voteString: string = ""
@@ -83,7 +89,7 @@ export class RoomComponent implements OnDestroy, OnInit {
   }
 
   disconnectRoom(){
-    const command:ICommand = {command:"Exit_room"}
+    const command:ICommand = { type: "command", command:"Exit_room" }
     this.api.sendCommand(command)
     this.destroy$.next();
     this.destroy$.complete()
@@ -114,13 +120,13 @@ export class RoomComponent implements OnDestroy, OnInit {
      let youHaveNotVoted = false;
 
      Object.values(data.votes).forEach(votes => {
-       if (votes.voter !== this.userName) {
+       if (votes.voter !== this.myVoterID) {
          hasOtherVoters = true;
          if (votes.vote === "") {
            allOthersVoted = false;
          }
        }
-       if (votes.voter === this.userName && votes.vote === "") {
+       if (votes.voter === this.myVoterID && votes.vote === "") {
          youHaveNotVoted = true;
        }
      });
@@ -159,7 +165,16 @@ export class RoomComponent implements OnDestroy, OnInit {
 
 
   connectRoom() {
-  const apiVotesConnection = this.api.getVotes()
+  const apiVoterID = this.api.getVoterID()
+    .pipe(takeUntil(this.destroy$));
+
+apiVoterID.subscribe({
+  next: (id: string | null) => {
+    this.myVoterID = id;
+  }
+});
+
+const apiVotesConnection = this.api.getVotes()
   .pipe(takeUntil(this.destroy$));
 
 apiVotesConnection.subscribe({
@@ -211,7 +226,7 @@ apiSettings.subscribe({
   }})
 };
 
-  objectKeys(obj: IVotes): string[] {
+  objectKeys(obj: VotesMap): string[] {
     if (obj){
     return Object.keys(obj)
     }else{return []}
@@ -219,7 +234,11 @@ apiSettings.subscribe({
 
   voted(value: string) {
     this.voteString = value
-    const vote: ISendVote = { voter: this.userName, vote: value,emoji: this.emoji}
+    if (!this.myVoterID) {
+      console.error("Cannot cast vote: own voter id not yet known (joined message not received)")
+      return
+    }
+    const vote: ISendVote = { type: "vote", voter: this.myVoterID, vote: value }
     this.api.sendVote(vote)
   }
   votingCardChange(card: string) {
@@ -228,26 +247,31 @@ apiSettings.subscribe({
       userDetails.votingCard = card
       this.localstorage.setUserDetails(userDetails)
     }
-    const cardChange:ICardChange = {Card_Change:card}
+    const cardChange:ICardChange = { type: "cardChange", card: card }
     this.api.changeCards(cardChange)
   }
 
   revealClicked( ){
-    const command:ICommand ={command:"Reveal_votes"}
+    const command:ICommand = { type: "command", command:"Reveal_votes" }
     this.api.sendCommand(command)
 
   }
 
   clearClicked(){
-    var command:ICommand ={command:"Clear_votes"}
-    this.api.sendCommand(command)
-    command ={command:"Reveal_votes"}
-    this.api.sendCommand(command)
+    const clearCommand:ICommand = { type: "command", command:"Clear_votes" }
+    this.api.sendCommand(clearCommand)
+    // Reveal_votes TOGGLES server-side rather than setting an explicit
+    // value, so only send it here if votes are currently revealed --
+    // otherwise clearing while hidden would incorrectly flip reveal on.
+    if (this.reveal) {
+      const revealCommand:ICommand = { type: "command", command:"Reveal_votes" }
+      this.api.sendCommand(revealCommand)
+    }
     this.clearVotes.next();
 
   }
 
-sortVotes(data: IVotes): { key: string, value: any }[] {
+sortVotes(data: VotesMap): { key: string, value: any }[] {
   // Define weights for non-numeric votes so they sort logically
   const weights: Record<string, number> = {
     "XXL": 100, "XL": 90, "L": 80, "M": 70, "S": 60, "XS": 50, "☕": 0, "?": -1
@@ -272,6 +296,7 @@ submitName():void{
     // Close modal and save details first
     this.showVoterModal = false;
     this.localstorage.setUserDetails({
+      userID: "",
       displayName: trimmedName,
       roomID: this.roomId,
       votingCard: 'Standard'
@@ -299,13 +324,6 @@ submitName():void{
 exitRoom(){
   this.api.disconnect()
   this.router.navigate([''])
-}
-
-updateEmoji(emoji:string){
-  this.emoji = emoji
-  const vote: ISendVote = { voter: this.userName, vote: this.voteString,emoji: this.emoji}
-  console.log(vote)
-  this.api.sendVote(vote)
 }
 
 handleStatsChange(stats:Statistics){

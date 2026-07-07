@@ -5,7 +5,6 @@ import { IUserDetails } from '../../i-user-details';
 import { LocalStorageService } from '../../local-storage.service';
 import { ApiService } from '../../api.service';
 import { ISettings } from '../../i-settings';
-import { ICommand } from '../../i-command';
 import { ICardChange } from '../../i-card-change';
 import { Observable } from 'rxjs';
 
@@ -60,8 +59,8 @@ export class VotingCardComponent implements OnInit {
       const newCard = this.votingCard.find((x) => x.name === selectCard)
       this.selectedOptions = newCard!.selectedOptions()
       this.selectedOption = newCard!.name
-      const card:ICardChange ={Card_Change:this.selectedOption}
-      this.api.changeCards(card)
+      const cardChange: ICardChange = { type: "cardChange", card: this.selectedOption }
+      this.api.changeCards(cardChange)
       this.localService.changeVotingCard(this.selectedOption)
 
     }
@@ -76,32 +75,17 @@ export class VotingCardComponent implements OnInit {
   voteClicked(voteValue: string) {
     this.currentVoteValue =voteValue
     console.log(`Voted:${voteValue}`)
-    this.toggleVoteButton(voteValue)
     this.vote.emit(voteValue)
 
   }
 
-  toggleVoteButton(voteValue:string){
-    const votebutton = document.querySelector(`#option-${voteValue}`) as HTMLElement
-    const buttons = document.querySelectorAll(".votingOption")
-    buttons?.forEach(option => {
-      if (option instanceof HTMLElement){
-        if(option.id != votebutton.id){
-          option.classList.remove("voteSelected")}
-        else{
-          option.classList.add("voteSelected")
-        }
-      }
-    });
-  }
-
   resetVoteCard()
     {
+    // The [class.is-selected] binding in the template already reacts to
+    // currentVoteValue -- clearing it is all that's needed. The previous
+    // version also manually stripped a "voteSelected" class via direct
+    // DOM queries, but nothing in voting-card.component.css ever styled
+    // that class, so it had no visual effect and has been removed.
     this.currentVoteValue = ""
-    const buttons = document.querySelectorAll(".votingOption")
-    buttons?.forEach(option => {
-      if (option instanceof HTMLElement){
-          option.classList.remove("voteSelected")}
-
-    })}
+    }
 }
