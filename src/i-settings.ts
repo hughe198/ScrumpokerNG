@@ -17,3 +17,14 @@ export interface ISettings {
     reactions: { [voterId: string]: IReaction[] };
     missile_used_by: string[];
 }
+
+// Used before the first server settings message arrives and after
+// disconnect. votingCard must match a card `name` in vote-types.ts
+// ("Standard" is also the backend's default).
+export const DEFAULT_SETTINGS: ISettings = {
+    type: 'settings',
+    reveal: false,
+    votingCard: 'Standard',
+    reactions: {},
+    missile_used_by: [],
+};

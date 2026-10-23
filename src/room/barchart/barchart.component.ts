@@ -4,7 +4,7 @@ import { NgChartsModule} from 'ng2-charts';
 import { IVoteRecord } from '../../i-vote';
 import { Subject, Subscription, takeUntil, combineLatest } from 'rxjs';
 import { ApiService } from '../../api.service';
-import { ISettings } from '../../i-settings';
+import { ISettings, DEFAULT_SETTINGS } from '../../i-settings';
 import { getVoteByName, VoteName } from '../vote-types';
 import { ThemeService } from '../../theme.service';
 import {Statistics} from '../../i-statistics'
@@ -52,13 +52,7 @@ export class BarchartComponent implements OnInit, OnDestroy {
   @Output() statsUpdated = new EventEmitter<Statistics>();
   votesSub!: Subscription;
   settingsSub!: Subscription;
-  settings: ISettings = {
-    type: "settings",
-    reveal: false,
-    votingCard: "fibonacci",
-    reactions: {},
-    missile_used_by: [],
-  };
+  settings: ISettings = DEFAULT_SETTINGS;
 
   constructor(private apiService: ApiService, private themeService: ThemeService) {}
 

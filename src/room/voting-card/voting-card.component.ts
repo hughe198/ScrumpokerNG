@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { voteExponential, voteFibonacci, voteLinear, voteTshirts,voteStandard } from '../vote-types';
 import { FormsModule } from '@angular/forms';
 import { IUserDetails } from '../../i-user-details';
@@ -6,7 +6,7 @@ import { LocalStorageService } from '../../local-storage.service';
 import { ApiService } from '../../api.service';
 import { ISettings } from '../../i-settings';
 import { ICardChange } from '../../i-card-change';
-import { Observable } from 'rxjs';
+import { Observable, Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-voting-card',
@@ -15,8 +15,9 @@ import { Observable } from 'rxjs';
   templateUrl: './voting-card.component.html',
   styleUrl: './voting-card.component.css'
 })
-export class VotingCardComponent implements OnInit {
+export class VotingCardComponent implements OnInit, OnDestroy {
 
+  private destroy$ = new Subject<void>();
   @Input() clearVotes!: Observable<void>;
   @Output() vote = new EventEmitter<string>
   @Output() allImagesLoaded = new EventEmitter<void>();
@@ -34,7 +35,7 @@ export class VotingCardComponent implements OnInit {
   selectedOptions = this.standardVote.selectedOptions()
 
   constructor(private localService: LocalStorageService, private api: ApiService) {
-    const settings = api.getSettings()
+    const settings = api.getSettings().pipe(takeUntil(this.destroy$))
     settings.subscribe((data)=>{
       this.settings = data
       this.selectedOption = this.settings.votingCard
@@ -45,10 +46,14 @@ export class VotingCardComponent implements OnInit {
     })
   }
   ngOnInit(): void {
-    this.clearVotes.subscribe(()=>{
+    this.clearVotes.pipe(takeUntil(this.destroy$)).subscribe(()=>{
       this.resetVoteCard()
     })
 
+  }
+  ngOnDestroy(): void {
+    this.destroy$.next()
+    this.destroy$.complete()
   }
   onCardChange(card: Event) {
     const selectElement = card.target as HTMLSelectElement

@@ -44,7 +44,7 @@ export class RoomComponent implements OnDestroy, OnInit {
   voteString: string = ""
   userDetails: IUserDetails | null
   clearVotes = new Subject<void>()
-  reveal:Boolean = false;
+  reveal: boolean = false;
   roomId!:string | null;
   showVoterModal = false;
   gongOfShame = false

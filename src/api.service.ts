@@ -7,22 +7,18 @@ import { IJoined } from './i-joined';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { ICardChange } from './i-card-change';
-import { ISettings, ISendSettingsUpdate } from './i-settings';
+import { ISettings, ISendSettingsUpdate, DEFAULT_SETTINGS } from './i-settings';
 import { ISendReaction } from './i-reaction';
 import { environment } from './environments/environment';
 import { IName } from './i-name';
+
+type OutgoingMessage = ISendVote | ICommand | ISendReaction | ICardChange | ISendSettingsUpdate;
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
-  private settings = new BehaviorSubject<ISettings>({
-    type: "settings",
-    reveal: false,
-    votingCard: "fibonacci",
-    reactions: {},
-    missile_used_by: [],
-  })
+  private settings = new BehaviorSubject<ISettings>(DEFAULT_SETTINGS)
   private results = new Subject<IResults>()
   // Holds this client's own server-assigned voter id once the "joined"
   // message arrives. BehaviorSubject (not Subject) so a component that
@@ -31,6 +27,9 @@ export class ApiService {
   private voterID = new BehaviorSubject<string | null>(null)
   private socket: WebSocket | null = null;
   private protocol: string = environment.wsssecure ? "wss" : "ws";
+  // Messages sent while the socket is still CONNECTING. Flushed in
+  // onopen, after the name handshake, which the server must see first.
+  private pending: OutgoingMessage[] = [];
 
   private duplicateNameSubject = new Subject<boolean>()
 
@@ -48,6 +47,8 @@ export class ApiService {
     this.socket.onopen = () => {
       console.log('Angular: Connected to websocket')
       this.socket?.send(JSON.stringify(voterName))
+      this.pending.forEach(message => this.socket?.send(JSON.stringify(message)))
+      this.pending = []
     }
     type WebSocketMessage = IJoined | IResults | IError | ISuccess | ISettings;
 
@@ -95,48 +96,42 @@ export class ApiService {
     return this.settings.asObservable()
   }
 
-  sendSettingsChange(message: ISendSettingsUpdate) {
-    if (this.socket) {
-      if (this.socket.readyState == WebSocket.OPEN) {
-        this.socket.send(JSON.stringify(message))
-      }
+  // Single send path for every outgoing message. Previously each send*
+  // method had its own copy of the readyState checks, and sendVote
+  // replaced socket.onopen while CONNECTING -- which dropped the name
+  // handshake, so the server never accepted the connection.
+  private send(message: OutgoingMessage) {
+    if (!this.socket) {
+      console.error("Websocket is not connected")
+      return
     }
+    if (this.socket.readyState === WebSocket.OPEN) {
+      this.socket.send(JSON.stringify(message))
+    } else if (this.socket.readyState === WebSocket.CONNECTING) {
+      this.pending.push(message)
+    } else {
+      console.error("Websocket connection is not open")
+    }
+  }
+
+  sendSettingsChange(message: ISendSettingsUpdate) {
+    this.send(message)
   }
 
   sendVote(message: ISendVote) {
-    if (this.socket) {
-      if (this.socket.readyState === WebSocket.OPEN) {
-        this.socket.send(JSON.stringify(message))
-      } else if (this.socket.readyState === WebSocket.CONNECTING) {
-        // If the socket is still connecting, wait for it to open
-        this.socket.onopen = () => {
-          this.socket?.send(JSON.stringify(message));
-        }
-      }
-      else {
-        console.error("Websocket connection is not open")
-      }
-    }
+    this.send(message)
   }
 
   sendCommand(message: ICommand) {
-    if (this.socket) {
-      if (this.socket.readyState === WebSocket.OPEN) {
-        this.socket.send(JSON.stringify(message))
-      } else {
-        console.error("Websocket connection is not open")
-      }
-    }
+    this.send(message)
   }
 
   sendReaction(message: ISendReaction) {
-    if (this.socket) {
-      if (this.socket.readyState === WebSocket.OPEN) {
-        this.socket.send(JSON.stringify(message))
-      } else {
-        console.error("Websocket connection is not open")
-      }
-    }
+    this.send(message)
+  }
+
+  changeCards(card: ICardChange) {
+    this.send(card)
   }
 
   requestDisconnect(): void {
@@ -147,47 +142,23 @@ export class ApiService {
   disconnect(): void {
     if (this.socket && this.socket.readyState !== WebSocket.CLOSED) {
       this.socket.close();
-      this.socket = null;
     }
-    this.settings.next({
-      type: "settings",
-      reveal: false,
-      votingCard: "fibonacci",
-      reactions: {},
-      missile_used_by: [],
-    });
-
+    this.socket = null;
+    this.pending = [];
+    // Reset state on the SAME subjects rather than completing and
+    // replacing them -- replacing left any existing subscriber attached
+    // to a dead subject that would never emit again.
+    this.settings.next(DEFAULT_SETTINGS);
     this.results.next({
       type: "result",
-      roomID: "", // Reset roomID
-      votes: {}, // Empty votes object
+      roomID: "",
+      votes: {},
     });
-    // Complete subjects and resets states
-    this.settings.complete();
-    this.results.complete();
-    this.settings = new BehaviorSubject<ISettings>({
-      type: "settings",
-      reveal: false,
-      votingCard: "fibonacci",
-      reactions: {},
-      missile_used_by: [],
-    });
-    this.results = new Subject<IResults>();
     this.voterID.next(null);
   }
 
   getVotes(): Observable<IResults> {
     return this.results.asObservable()
-  }
-
-  changeCards(card: ICardChange) {
-    if (this.socket) {
-      if (this.socket.readyState === WebSocket.OPEN) {
-        this.socket.send(JSON.stringify(card))
-      } else {
-        console.error("Websocket connection is not open")
-      }
-    }
   }
 
   private handleSuccessMessage(successMessage: string): void {
