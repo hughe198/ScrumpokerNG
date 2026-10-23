@@ -25,7 +25,11 @@ export class LobbyComponent implements OnInit {
   localStorage: boolean = false
   active = false
   duplicateNameError = false;
+  // One-off message passed via router state, e.g. after an admin closes the room.
+  notice: string | null = null;
   ngOnInit(): void {
+    this.notice = history.state?.notice ?? null
+
     this.api.getDuplicateNameObservable().subscribe((isDuplicate)=>{
       if (isDuplicate){
         this.active = false

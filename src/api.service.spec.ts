@@ -81,6 +81,16 @@ describe('ApiService', () => {
     expect(received).toEqual(['r1']);
   });
 
+  it('reports an admin-closed room (close code 4001)', () => {
+    let closed = false;
+    service.getRoomClosed().subscribe(() => closed = true);
+    service.connect('room-1', 'Alice');
+
+    FakeWebSocket.instances[0].onclose?.({ code: 4001 });
+
+    expect(closed).toBeTrue();
+  });
+
   it('resets settings on disconnect without completing the stream', () => {
     const received: ISettings[] = [];
     let completed = false;

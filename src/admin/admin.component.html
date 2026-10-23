@@ -1,0 +1,214 @@
+<div class="admin container py-4">
+  <header class="admin-header">
+    <h1 class="h4 mb-0">ScrumPoker Admin</h1>
+    <div class="d-flex align-items-center gap-2">
+      @if (loggedIn) {
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="refresh()">↻ Refresh</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="logout()">Log out</button>
+      }
+      <app-theme-toggle></app-theme-toggle>
+    </div>
+  </header>
+
+  @if (!loggedIn) {
+    <form class="card shadow-sm login-card" (ngSubmit)="login()">
+      <div class="card-body">
+        <h2 class="h5 card-title mb-3">Log in</h2>
+        <label for="admin-password" class="form-label">Admin password</label>
+        <input
+          id="admin-password"
+          name="password"
+          type="password"
+          class="form-control"
+          autocomplete="current-password"
+          [(ngModel)]="password"
+          required
+        />
+        @if (loginError) {
+          <div class="text-danger small mt-2" role="alert">{{ loginError }}</div>
+        }
+        <button type="submit" class="btn btn-primary w-100 mt-3" [disabled]="!password || loggingIn">
+          {{ loggingIn ? 'Logging in…' : 'Log in' }}
+        </button>
+      </div>
+    </form>
+  } @else {
+    @if (loadError) {
+      <div class="alert alert-danger" role="alert">{{ loadError }}</div>
+    }
+
+    @if (rooms) {
+      <section class="stats" aria-label="Summary">
+        <div class="stat">
+          <div class="stat-value">{{ rooms.stats.activeRooms }}</div>
+          <div class="stat-label">Active rooms</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">{{ rooms.stats.inactiveRooms }}</div>
+          <div class="stat-label">Inactive rooms</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">{{ rooms.stats.connectedUsers }}</div>
+          <div class="stat-label">People connected</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">{{ uptime(rooms.stats.uptimeSeconds) }}</div>
+          <div class="stat-label">Server uptime</div>
+        </div>
+      </section>
+
+      @if (lastRefreshed) {
+        <p class="text-body-secondary small mb-4">Updates every 10 seconds · last {{ ago(lastRefreshed) }}</p>
+      }
+
+      <!-- Active rooms -->
+      <section class="mb-5">
+        <h2 class="h5">Active rooms <span class="text-body-secondary fw-normal">(someone connected)</span></h2>
+        @if (rooms.active.length) {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th scope="col">Room</th>
+                  <th scope="col">People</th>
+                  <th scope="col">Voted</th>
+                  <th scope="col">Votes</th>
+                  <th scope="col" class="d-none d-md-table-cell">Cards</th>
+                  <th scope="col" class="d-none d-md-table-cell">Timer</th>
+                  <th scope="col">Last active</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (room of rooms.active; track room.roomID) {
+                  <tr class="room-row" [class.table-active]="selectedRoomId === room.roomID" (click)="toggleRoom(room)">
+                    <td>
+                      <button
+                        type="button"
+                        class="btn btn-link p-0 room-id"
+                        [attr.aria-expanded]="selectedRoomId === room.roomID"
+                        (click)="$event.stopPropagation(); toggleRoom(room)"
+                      >{{ selectedRoomId === room.roomID ? '▾' : '▸' }} {{ shortId(room.roomID) }}</button>
+                    </td>
+                    <td>{{ room.voterCount }}</td>
+                    <td>{{ room.votedCount }}/{{ room.voterCount }}</td>
+                    <td>
+                      <span class="badge" [class.text-bg-success]="room.revealed" [class.text-bg-secondary]="!room.revealed">
+                        {{ room.revealed ? 'Revealed' : 'Hidden' }}
+                      </span>
+                    </td>
+                    <td class="d-none d-md-table-cell">{{ room.votingCard }}</td>
+                    <td class="d-none d-md-table-cell">{{ room.timerState ?? '–' }}</td>
+                    <td>{{ ago(room.lastActivity) }}</td>
+                  </tr>
+                  @if (selectedRoomId === room.roomID) {
+                    <tr class="detail-row">
+                      <td colspan="7">
+                        <ng-container *ngTemplateOutlet="roomDetail; context: { $implicit: room }"></ng-container>
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="text-body-secondary">Nobody is in a room right now.</p>
+        }
+      </section>
+
+      <!-- Inactive rooms -->
+      <section>
+        <h2 class="h5">Inactive rooms <span class="text-body-secondary fw-normal">(empty, kept until they expire)</span></h2>
+        @if (rooms.inactive.length) {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th scope="col">Room</th>
+                  <th scope="col">Last active</th>
+                  <th scope="col">Expires</th>
+                  <th scope="col" class="d-none d-md-table-cell">Created</th>
+                  <th scope="col" class="d-none d-md-table-cell">Cards</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (room of rooms.inactive; track room.roomID) {
+                  <tr class="room-row" [class.table-active]="selectedRoomId === room.roomID" (click)="toggleRoom(room)">
+                    <td>
+                      <button
+                        type="button"
+                        class="btn btn-link p-0 room-id"
+                        [attr.aria-expanded]="selectedRoomId === room.roomID"
+                        (click)="$event.stopPropagation(); toggleRoom(room)"
+                      >{{ selectedRoomId === room.roomID ? '▾' : '▸' }} {{ shortId(room.roomID) }}</button>
+                    </td>
+                    <td>{{ ago(room.lastActivity) }}</td>
+                    <td>{{ inTime(room.expiresAt) }}</td>
+                    <td class="d-none d-md-table-cell">{{ ago(room.createdAt) }}</td>
+                    <td class="d-none d-md-table-cell">{{ room.votingCard }}</td>
+                  </tr>
+                  @if (selectedRoomId === room.roomID) {
+                    <tr class="detail-row">
+                      <td colspan="5">
+                        <ng-container *ngTemplateOutlet="roomDetail; context: { $implicit: room }"></ng-container>
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="text-body-secondary">No empty rooms waiting to expire.</p>
+        }
+      </section>
+    } @else if (!loadError) {
+      <p class="text-body-secondary">Loading rooms…</p>
+    }
+  }
+</div>
+
+<ng-template #roomDetail let-room>
+  <div class="room-detail">
+    <div class="detail-id">
+      <code>{{ room.roomID }}</code>
+    </div>
+
+    @if (detailError) {
+      <div class="text-danger small" role="alert">{{ detailError }}</div>
+    } @else if (!detail) {
+      <div class="text-body-secondary small">Loading…</div>
+    } @else {
+      @if (detail.voters.length) {
+        <h3 class="h6 mt-2">In the room</h3>
+        <ul class="voter-list">
+          @for (voter of detail.voters; track $index) {
+            <li>
+              <span class="voted-mark" [class.done]="voter.hasVoted" [attr.aria-label]="voter.hasVoted ? 'Voted' : 'Not voted yet'">
+                {{ voter.hasVoted ? '✓' : '○' }}
+              </span>
+              {{ voter.name }}
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="text-body-secondary small mt-2 mb-1">Nobody is in this room.</p>
+      }
+      <dl class="detail-facts">
+        <dt>Created</dt><dd>{{ ago(detail.createdAt) }}</dd>
+        <dt>Expires</dt><dd>{{ inTime(detail.expiresAt) }} if unused</dd>
+        <dt>Reactions this round</dt><dd>{{ detail.reactionCount }}</dd>
+        <dt>Missiles fired</dt><dd>{{ detail.missileFiredBy.length ? detail.missileFiredBy.join(', ') : 'none' }}</dd>
+        @if (detail.timer) {
+          <dt>Timer</dt><dd>{{ detail.timer.state }}, started by {{ detail.timer.startedBy }}</dd>
+        }
+      </dl>
+    }
+
+    <div class="detail-actions">
+      <a class="btn btn-outline-primary btn-sm" [href]="roomLink(room.roomID)" target="_blank" rel="noopener">Open room ↗</a>
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="copyLink(room.roomID)">Copy link</button>
+      <button type="button" class="btn btn-outline-danger btn-sm" (click)="closeRoom(room)">Close room</button>
+    </div>
+  </div>
+</ng-template>

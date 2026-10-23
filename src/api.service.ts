@@ -37,6 +37,12 @@ export class ApiService {
   private pending: OutgoingMessage[] = [];
 
   private duplicateNameSubject = new Subject<boolean>()
+  // Fires when an administrator closes the room (server close code 4001).
+  private roomClosedSubject = new Subject<void>()
+
+  getRoomClosed(): Observable<void> {
+    return this.roomClosedSubject.asObservable();
+  }
 
   getDuplicateNameObservable(): Observable<boolean> {
     return this.duplicateNameSubject.asObservable();
@@ -96,6 +102,9 @@ export class ApiService {
       if (event.code === 4000) {
         this.duplicateNameSubject.next(true);
         console.log(true)
+      }
+      if (event.code === 4001) {
+        this.roomClosedSubject.next();
       }
     }
   }

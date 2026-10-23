@@ -1,0 +1,111 @@
+.admin {
+  max-width: 1000px;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.login-card {
+  max-width: 360px;
+  margin: 10vh auto 0;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.stat {
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--bs-border-color);
+  background: var(--bs-tertiary-bg);
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--bs-secondary-color);
+}
+
+.room-row {
+  cursor: pointer;
+}
+
+.room-id {
+  font-family: var(--bs-font-monospace);
+  text-decoration: none;
+}
+
+.detail-row > td {
+  background: var(--bs-body-bg);
+}
+
+.room-detail {
+  padding: 4px 4px 8px 20px;
+}
+
+.voter-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+
+.voted-mark {
+  display: inline-block;
+  width: 1.2em;
+  color: var(--bs-secondary-color);
+}
+
+.voted-mark.done {
+  color: var(--bs-success);
+  font-weight: 700;
+}
+
+.detail-facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 2px 16px;
+  font-size: 0.85rem;
+  margin: 8px 0 12px;
+}
+
+.detail-facts dt {
+  font-weight: 400;
+  color: var(--bs-secondary-color);
+}
+
+.detail-facts dd {
+  margin: 0;
+}
+
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 575.98px) {
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .room-detail {
+    padding-left: 4px;
+  }
+}

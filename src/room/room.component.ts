@@ -206,6 +206,12 @@ apiVotesConnection.subscribe({
 
 
 
+this.api.getRoomClosed()
+  .pipe(takeUntil(this.destroy$))
+  .subscribe(() => {
+    this.router.navigate([''], { state: { notice: 'This room was closed by an administrator.' } })
+  });
+
 this.api.getMissileLaunches()
   .pipe(takeUntil(this.destroy$))
   .subscribe(launch => {

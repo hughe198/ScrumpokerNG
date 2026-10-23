@@ -13,6 +13,12 @@
          (load)="onBannerLoaded()"
          (error)="onBannerLoaded()">
     <div class="col-md-6">
+      @if (notice) {
+        <div class="alert alert-warning alert-dismissible" role="alert">
+          {{ notice }}
+          <button type="button" class="btn-close" aria-label="Dismiss" (click)="notice = null"></button>
+        </div>
+      }
       <!-- Join a Room card -->
       <div class="card shadow p-4">
         <h5 class="card-title text-center mb-4">Join a Room</h5>
