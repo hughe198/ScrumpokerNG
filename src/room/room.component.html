@@ -67,55 +67,23 @@
 
   <!-- Vote Results -->
   <h5 class="text-center my-4">Vote Results</h5>
-  @if (settings && !settings.reveal) {
-    <ul class="list-group">
-      @for (voter of objectKeys(votes); track voter) {
-        <li class="list-group-item d-flex justify-content-between align-items-center vote-list-item">
-          <span>{{ votes[voter].displayName }}:</span>
-          @if (votes[voter].vote === "") {
-            <fa-icon [icon]="faSquare"></fa-icon>
-          } @else {
-            <fa-icon [icon]="faCheckSquare"></fa-icon>
-          }
-        </li>
-      }
-      @empty {
-        <li class="list-group-item text-center vote-list-item">
-          No voters found.
-        </li>
-      }
-    </ul>
+  @if (settings) {
+    <app-player-card-row
+      [votes]="votes"
+      [reveal]="!!reveal"
+      [myVoterID]="myVoterID"
+      (ownCardClicked)="onOwnCardClicked()"
+    ></app-player-card-row>
   }
 
+  <!--
+    TODO (Phase 2 of the frontend plan): reactions land above/below each
+    non-self card, per app-player-card.component.html's TODO marker.
+    Depends on resolving the still-open picker trigger style / emoji set
+    questions before app-reaction-slot can be built.
+  -->
 
-@if (settings && settings.reveal) {
-  <ul class="list-group">
-    @for (entry of sortedVotes; track entry.key) {
-      <li class="list-group-item vote-list-item">
-        <div class="row text-center align-items-center">
-
-          <div class="col-4 fw-bold">
-            {{ entry.value.displayName }} </div>
-
-          <div class="col-8">
-            {{ entry.value.vote }} </div>
-
-          <!--
-            TODO (Phase 2 of the frontend plan): reactions land here.
-            The old self-picked emoji-under-your-own-name feature was
-            removed since it relied on a vote.emoji field the backend
-            no longer sends. Replace with reading settings.reactions[entry.key]
-            and rendering whatever's landed on this voter, plus an emoji
-            picker that fires api.sendReaction({type:'reaction', to_voter: entry.key, ...})
-            targeting OTHER voters' rows, not your own.
-          -->
-
-        </div>
-      </li>
-    }
-    <!-- <h5 class="text-center my-4">Mode: {{currentStats.mode}}</h5> -->
-  </ul>
-}
+  <!-- <h5 class="text-center my-4">Mode: {{currentStats.mode}}</h5> -->
 
 
  <!-- Bottom Buttons -->

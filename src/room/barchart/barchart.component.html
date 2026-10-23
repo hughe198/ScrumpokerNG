@@ -1,5 +1,5 @@
 <div class="chart-container">
-  @if (settings.reveal) {
+  @if (settings && settings.reveal) {
     
     <!-- Consensus Panel -->
     <section class="panel" [class.collapsed]="collapsed.consensus">

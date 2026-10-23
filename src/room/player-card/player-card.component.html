@@ -1,0 +1,33 @@
+<div
+  class="player-card"
+  [class.self]="isSelf"
+  [class.clickable]="isClickable"
+  [class.voted]="hasVoted"
+  role="button"
+  [attr.tabindex]="isClickable ? 0 : -1"
+  [attr.aria-pressed]="isSelf ? hasVoted : null"
+  [attr.aria-label]="isClickable ? 'Cast your vote' : null"
+  (click)="onClick()"
+  (keydown.enter)="onClick()"
+  (keydown.space)="onClick()"
+>
+  <div class="player-card-body">
+    @if (!reveal) {
+      <span class="player-name">{{ displayName }}</span>
+      <fa-icon
+        class="vote-status-icon"
+        [icon]="hasVoted ? faCheckSquare : faSquare"
+        [attr.aria-label]="hasVoted ? 'Voted' : 'Not yet voted'"
+      ></fa-icon>
+    } @else {
+      <span class="player-name small">{{ displayName }}</span>
+      <span class="vote-value">{{ vote }}</span>
+    }
+  </div>
+
+  <!--
+    TODO: app-reaction-slot mounts here (above or below, per the design
+    spec), only when !isSelf. Depends on resolving the still-open picker
+    trigger style / emoji set questions before it can be built.
+  -->
+</div>

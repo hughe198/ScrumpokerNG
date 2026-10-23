@@ -1,0 +1,14 @@
+<div class="player-card-row">
+  @for (voterId of voterIds; track voterId) {
+    <app-player-card
+      [voterId]="voterId"
+      [displayName]="votes[voterId].displayName"
+      [vote]="votes[voterId].vote"
+      [reveal]="reveal"
+      [isSelf]="isSelf(voterId)"
+      (cardClicked)="onCardClicked(voterId)"
+    ></app-player-card>
+  } @empty {
+    <p class="text-center w-100">No voters found.</p>
+  }
+</div>

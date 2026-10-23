@@ -52,7 +52,13 @@ export class BarchartComponent implements OnInit, OnDestroy {
   @Output() statsUpdated = new EventEmitter<Statistics>();
   votesSub!: Subscription;
   settingsSub!: Subscription;
-  settings!: ISettings;
+  settings: ISettings = {
+    type: "settings",
+    reveal: false,
+    votingCard: "fibonacci",
+    reactions: {},
+    missile_used_by: [],
+  };
 
   constructor(private apiService: ApiService, private themeService: ThemeService) {}
 

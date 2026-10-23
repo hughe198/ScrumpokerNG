@@ -6,18 +6,14 @@ import { IVoteRecord, ISendVote } from '../i-vote';
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { VotingCardComponent } from "./voting-card/voting-card.component";
-import { ICardChange } from '../i-card-change';
 import { ICommand } from '../i-command';
-import {FontAwesomeModule} from '@fortawesome/angular-fontawesome'
-import { faCoffee } from '@fortawesome/free-solid-svg-icons';
-import { faCheckSquare } from '@fortawesome/free-solid-svg-icons';
-import { faSquare } from '@fortawesome/free-solid-svg-icons';
 import { ThemeToggleComponent } from '../app/theme-toggle/theme-toggle.component';
 import { ISettings } from '../i-settings';
 import {  Subject, take, takeUntil } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BarchartComponent } from "./barchart/barchart.component";
 import { Statistics } from '../i-statistics';
+import { PlayerCardRowComponent } from './player-card-row/player-card-row.component';
 
 // IVotes was previously exported from i-results.ts; votes are now typed
 // inline there as { [voterId: string]: IVoteRecord }. Local alias so the
@@ -27,16 +23,13 @@ type VotesMap = { [voterId: string]: IVoteRecord };
 @Component({
   selector: 'app-room',
   standalone: true,
-  imports: [FormsModule, VotingCardComponent, FontAwesomeModule, BarchartComponent, ThemeToggleComponent],
+  imports: [FormsModule, VotingCardComponent, BarchartComponent, ThemeToggleComponent, PlayerCardRowComponent],
   templateUrl: './room.component.html',
   styleUrl: './room.component.css'
 })
 
 
 export class RoomComponent implements OnDestroy, OnInit {
-  faCoffee = faCoffee
-  faCheckSquare = faCheckSquare
-  faSquare = faSquare
   active:boolean = false
 
   private destroy$ = new Subject<void>();
@@ -45,14 +38,13 @@ export class RoomComponent implements OnDestroy, OnInit {
   // message. Votes/reactions are keyed by this, not by display name --
   // see setGongofShame() and voted() below.
   myVoterID: string | null = null
-  votes!: VotesMap
+  votes: VotesMap = {}
   results!: IResults
   settings: ISettings | null = null
   voteString: string = ""
   userDetails: IUserDetails | null
   clearVotes = new Subject<void>()
   reveal:Boolean = false;
-  sortedVotes: { key: string, value: any }[] = [];
   roomId!:string | null;
   showVoterModal = false;
   gongOfShame = false
@@ -183,10 +175,7 @@ apiVotesConnection.subscribe({
     this.results = data;
     this.votes = data.votes;
 
-    // 2. Handle Display Logic (Sorting)
-    this.sortedVotes = this.sortVotes(data.votes);
-
-    // 3. Handle Sound Logic (Gong)
+    // 2. Handle Sound Logic (Gong)
     const currentGongState = this.setGongofShame(data);
     // Only trigger gong on the "rising edge" (when it changes from false to true)
     if (currentGongState && !this.gongOfShame) {
@@ -194,12 +183,12 @@ apiVotesConnection.subscribe({
     }
     this.gongOfShame = currentGongState;
 
-    // 4. Handle Clear Logic
+    // 3. Handle Clear Logic
     const allVotesEmpty = Object.values(this.votes).every(v => v.vote === "");
     if (allVotesEmpty) {
       this.clearVotes.next();
     }
-    // 5. Force UI Update for WebSocket message
+    // 4. Force UI Update for WebSocket message
     this.cdr.markForCheck();
   },
   error: (err) => {
@@ -226,12 +215,6 @@ apiSettings.subscribe({
   }})
 };
 
-  objectKeys(obj: VotesMap): string[] {
-    if (obj){
-    return Object.keys(obj)
-    }else{return []}
-  }
-
   voted(value: string) {
     this.voteString = value
     if (!this.myVoterID) {
@@ -241,16 +224,6 @@ apiSettings.subscribe({
     const vote: ISendVote = { type: "vote", voter: this.myVoterID, vote: value }
     this.api.sendVote(vote)
   }
-  votingCardChange(card: string) {
-    const userDetails = this.localstorage.getUserDetails()
-    if (userDetails) {
-      userDetails.votingCard = card
-      this.localstorage.setUserDetails(userDetails)
-    }
-    const cardChange:ICardChange = { type: "cardChange", card: card }
-    this.api.changeCards(cardChange)
-  }
-
   revealClicked( ){
     const command:ICommand = { type: "command", command:"Reveal_votes" }
     this.api.sendCommand(command)
@@ -270,25 +243,6 @@ apiSettings.subscribe({
     this.clearVotes.next();
 
   }
-
-sortVotes(data: VotesMap): { key: string, value: any }[] {
-  // Define weights for non-numeric votes so they sort logically
-  const weights: Record<string, number> = {
-    "XXL": 100, "XL": 90, "L": 80, "M": 70, "S": 60, "XS": 50, "☕": 0, "?": -1
-  };
-
-  const isDataNumeric = (val: string) => !isNaN(Number(val)) && val.trim() !== "";
-
-  return Object.entries(data)
-    .sort(([, a], [, b]) => {
-      const valA = isDataNumeric(a.vote) ? Number(a.vote) : (weights[a.vote] || 0);
-      const valB = isDataNumeric(b.vote) ? Number(b.vote) : (weights[b.vote] || 0);
-
-      // Descending order: B - A
-      return valB - valA;
-    })
-    .map(([key, value]) => ({ key, value }));
-}
 
 submitName():void{
   const trimmedName = this.userName.trim()
@@ -324,6 +278,12 @@ submitName():void{
 exitRoom(){
   this.api.disconnect()
   this.router.navigate([''])
+}
+
+onOwnCardClicked(): void {
+  // TODO: open the vote modal here once it exists (build order step 5).
+  // For now this just confirms the click is reaching the parent.
+  console.log('Own card clicked -- vote modal not built yet');
 }
 
 handleStatsChange(stats:Statistics){
