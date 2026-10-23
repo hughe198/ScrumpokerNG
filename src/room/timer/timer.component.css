@@ -1,0 +1,88 @@
+.timer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.timer-display {
+  min-width: 4.5em;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--bs-border-color);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-align: center;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+.timer.paused .timer-display {
+  opacity: 0.6;
+}
+
+.timer.warn .timer-display {
+  color: var(--bs-warning-text-emphasis);
+  background: var(--bs-warning-bg-subtle);
+  border-color: var(--bs-warning);
+}
+
+.timer.danger .timer-display {
+  color: var(--bs-danger-text-emphasis);
+  background: var(--bs-danger-bg-subtle);
+  border-color: var(--bs-danger);
+  animation: timer-pulse 1s ease-in-out infinite;
+}
+
+.timer-expired {
+  font-weight: 700;
+  animation: timer-pulse 0.6s ease-in-out infinite;
+}
+
+.timer-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 1002;
+  width: 220px;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.15);
+  display: grid;
+  gap: 8px;
+}
+
+.timer-presets {
+  display: flex;
+  gap: 4px;
+}
+
+.timer-presets .btn {
+  flex: 1;
+  padding: 0.2rem 0;
+}
+
+.timer-custom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.timer-custom input {
+  width: 70px;
+}
+
+@keyframes timer-pulse {
+  50% { opacity: 0.55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .timer.danger .timer-display,
+  .timer-expired {
+    animation: none;
+  }
+}

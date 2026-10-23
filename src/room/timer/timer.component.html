@@ -1,0 +1,79 @@
+<div
+  class="timer"
+  [class.warn]="warn"
+  [class.danger]="danger"
+  [class.paused]="isPaused"
+  [class.expired]="expired"
+>
+  @if (expired) {
+    <button
+      type="button"
+      class="btn btn-danger btn-sm timer-expired"
+      title="Start another timer"
+      (click)="togglePopover()"
+    >⏰ Time's up!</button>
+  } @else if (timer) {
+    <span
+      class="timer-display"
+      [attr.title]="'Started by ' + timer.startedBy + (isPaused ? ' (paused)' : '')"
+      [attr.aria-label]="'Discussion timer ' + display + (isPaused ? ', paused' : ' remaining')"
+    >⏱ {{ display }}</span>
+    @if (isPaused) {
+      <button type="button" class="btn btn-outline-secondary btn-sm" title="Resume" aria-label="Resume timer" (click)="resume()">▶</button>
+    } @else {
+      <button type="button" class="btn btn-outline-secondary btn-sm" title="Pause" aria-label="Pause timer" (click)="pause()">⏸</button>
+    }
+    <button type="button" class="btn btn-outline-secondary btn-sm" title="Add one minute" aria-label="Add one minute" (click)="addMinute()">+1m</button>
+    <button type="button" class="btn btn-outline-secondary btn-sm" title="Stop" aria-label="Stop timer" (click)="stop()">■</button>
+  } @else {
+    <button
+      type="button"
+      class="btn btn-outline-secondary btn-sm"
+      aria-haspopup="true"
+      [attr.aria-expanded]="popoverOpen"
+      title="Discussion timer"
+      (click)="togglePopover()"
+    >⏱<span class="d-none d-sm-inline ms-1">Timer</span></button>
+  }
+
+  <button
+    type="button"
+    class="btn btn-outline-secondary btn-sm"
+    [attr.title]="muted ? 'Unmute timer alarm' : 'Mute timer alarm'"
+    [attr.aria-label]="muted ? 'Unmute timer alarm' : 'Mute timer alarm'"
+    [attr.aria-pressed]="muted"
+    (click)="toggleMute()"
+  >{{ muted ? '🔕' : '🔔' }}</button>
+
+  @if (popoverOpen) {
+    <div class="timer-popover" role="dialog" aria-label="Start a discussion timer">
+      <div class="timer-presets">
+        @for (preset of presets; track preset) {
+          <button
+            type="button"
+            class="btn btn-sm"
+            [class.btn-primary]="preset === minutes"
+            [class.btn-outline-secondary]="preset !== minutes"
+            (click)="minutes = preset"
+          >{{ preset }}m</button>
+        }
+      </div>
+      <label class="timer-custom">
+        <input
+          type="number"
+          class="form-control form-control-sm"
+          min="1"
+          max="60"
+          step="1"
+          [(ngModel)]="minutes"
+          (keydown.enter)="start()"
+          aria-label="Minutes"
+        />
+        <span>minutes</span>
+      </label>
+      <button type="button" class="btn btn-success btn-sm w-100" (click)="start()">Start {{ minutes }} min</button>
+    </div>
+  }
+
+  <span class="visually-hidden" aria-live="polite">{{ announcement }}</span>
+</div>

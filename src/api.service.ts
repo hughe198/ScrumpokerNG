@@ -12,8 +12,9 @@ import { ISendReaction } from './i-reaction';
 import { environment } from './environments/environment';
 import { IName } from './i-name';
 import { IMissileLaunch } from './i-missile';
+import { ISendTimer } from './i-timer';
 
-type OutgoingMessage = ISendVote | ICommand | ISendReaction | ICardChange | ISendSettingsUpdate;
+type OutgoingMessage = ISendVote | ICommand | ISendReaction | ICardChange | ISendSettingsUpdate | ISendTimer;
 
 @Injectable({
   providedIn: 'root'
@@ -139,6 +140,10 @@ export class ApiService {
 
   changeCards(card: ICardChange) {
     this.send(card)
+  }
+
+  sendTimer(message: ISendTimer) {
+    this.send(message)
   }
 
   requestDisconnect(): void {

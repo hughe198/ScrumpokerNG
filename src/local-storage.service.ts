@@ -45,6 +45,23 @@ export class LocalStorageService {
     }
   }
 
+  // Per-browser mute for the discussion timer's alarm (all rooms).
+  isTimerAlarmMuted(): boolean {
+    try {
+      return localStorage.getItem("timerAlarmMuted") === "true"
+    } catch {
+      return false
+    }
+  }
+
+  setTimerAlarmMuted(muted: boolean): void {
+    try {
+      localStorage.setItem("timerAlarmMuted", String(muted))
+    } catch (error) {
+      console.log("Error saving to localStorage", error)
+    }
+  }
+
   markMissileFired(roomID: string): void {
     try {
       localStorage.setItem(`missileFired:${roomID}`, "true")

@@ -15,6 +15,7 @@ import { BarchartComponent } from "./barchart/barchart.component";
 import { Statistics } from '../i-statistics';
 import { PlayerCardRowComponent } from './player-card-row/player-card-row.component';
 import { MissileOverlayComponent } from './missile/missile-overlay/missile-overlay.component';
+import { TimerComponent } from './timer/timer.component';
 
 // IVotes was previously exported from i-results.ts; votes are now typed
 // inline there as { [voterId: string]: IVoteRecord }. Local alias so the
@@ -24,7 +25,7 @@ type VotesMap = { [voterId: string]: IVoteRecord };
 @Component({
   selector: 'app-room',
   standalone: true,
-  imports: [FormsModule, VotingCardComponent, BarchartComponent, ThemeToggleComponent, PlayerCardRowComponent, MissileOverlayComponent],
+  imports: [FormsModule, VotingCardComponent, BarchartComponent, ThemeToggleComponent, PlayerCardRowComponent, MissileOverlayComponent, TimerComponent],
   templateUrl: './room.component.html',
   styleUrl: './room.component.css'
 })
