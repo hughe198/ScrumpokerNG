@@ -280,6 +280,10 @@ exitRoom(){
   this.router.navigate([''])
 }
 
+get missileUsed(): boolean {
+  return !!this.myVoterID && !!this.settings?.missile_used_by.includes(this.myVoterID);
+}
+
 onOwnCardClicked(): void {
   // TODO: open the vote modal here once it exists (build order step 5).
   // For now this just confirms the click is reaching the parent.

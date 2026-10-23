@@ -1,0 +1,127 @@
+.reaction-slot {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Fixed min-height so cards don't jump as the first reaction lands */
+.reaction-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  min-height: 24px;
+  max-width: 120px;
+}
+
+.reaction-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 6px;
+  height: 22px;
+  border-radius: 11px;
+  font-size: 0.8rem;
+  line-height: 1;
+  background: var(--bs-tertiary-bg);
+  border: 1px solid var(--bs-border-color);
+  cursor: default;
+}
+
+.reaction-chip.missile {
+  border-color: var(--bs-danger);
+  background: color-mix(in oklab, var(--bs-danger) 12%, var(--bs-body-bg));
+}
+
+.reaction-chip.more {
+  color: var(--bs-secondary-color);
+}
+
+.reaction-count {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--bs-secondary-color);
+}
+
+.reaction-trigger {
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 11px;
+  border: 1px dashed var(--bs-border-color);
+  background: transparent;
+  color: var(--bs-secondary-color);
+  font-size: 0.75rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: opacity 120ms ease, border-color 120ms ease;
+}
+
+.reaction-trigger:hover,
+.reaction-trigger.open {
+  border-color: var(--bs-primary);
+  color: var(--bs-primary);
+}
+
+.reaction-trigger:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+}
+
+/* Hover-capable devices only show the trigger when the card is hovered
+   or the trigger has focus. Touch devices always show it, since there
+   is no hover to reveal it. */
+@media (hover: hover) {
+  .reaction-trigger {
+    opacity: 0;
+  }
+  :host-context(app-player-card:hover) .reaction-trigger,
+  .reaction-trigger:focus-visible,
+  .reaction-trigger.open {
+    opacity: 1;
+  }
+}
+
+/* Opens upward over the card, so it never pushes the layout below */
+.reaction-picker {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: grid;
+  grid-template-columns: repeat(5, 32px);
+  gap: 4px;
+  padding: 6px;
+  border-radius: 10px;
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.15);
+}
+
+.picker-emoji {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.picker-emoji:hover:not(:disabled),
+.picker-emoji:focus-visible {
+  background: var(--bs-tertiary-bg);
+  outline: none;
+}
+
+.missile-button {
+  background: color-mix(in oklab, var(--bs-danger) 12%, var(--bs-body-bg));
+}
+
+.missile-button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}

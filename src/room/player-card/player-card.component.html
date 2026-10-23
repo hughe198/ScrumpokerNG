@@ -24,10 +24,14 @@
       <span class="vote-value">{{ vote }}</span>
     }
   </div>
-
-  <!--
-    TODO: app-reaction-slot mounts here (above or below, per the design
-    spec), only when !isSelf. Depends on resolving the still-open picker
-    trigger style / emoji set questions before it can be built.
-  -->
 </div>
+
+<!-- Outside .player-card so clicks in the picker never reach onClick().
+     On your own card it only shows reactions you've received. -->
+<app-reaction-slot
+  [targetVoterId]="voterId"
+  [reactions]="reactions"
+  [missileUsed]="missileUsed"
+  [votes]="votes"
+  [readonly]="isSelf"
+></app-reaction-slot>

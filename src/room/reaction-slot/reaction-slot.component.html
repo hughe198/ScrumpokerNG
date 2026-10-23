@@ -1,0 +1,53 @@
+@if (!readonly || reactions.length) {
+  <div class="reaction-slot">
+    <div class="reaction-chips">
+      @for (group of visibleGroups; track group.emoji) {
+        <span
+          class="reaction-chip"
+          [class.missile]="group.isMissile"
+          [attr.title]="chipTitle(group)"
+          [attr.aria-label]="chipTitle(group)"
+        >{{ group.emoji }}@if (group.count > 1) {<span class="reaction-count">{{ group.count }}</span>}</span>
+      }
+      @if (hiddenGroups.length) {
+        <span class="reaction-chip more" [attr.title]="hiddenTitle()">+{{ hiddenGroups.length }}</span>
+      }
+
+      @if (!readonly) {
+        <button
+          type="button"
+          class="reaction-trigger"
+          [class.open]="pickerOpen"
+          aria-haspopup="true"
+          [attr.aria-expanded]="pickerOpen"
+          [attr.aria-label]="'React to ' + targetName"
+          (click)="togglePicker()"
+        >☺+</button>
+      }
+    </div>
+
+    @if (pickerOpen) {
+      <div class="reaction-picker" role="menu" [attr.aria-label]="'Reactions for ' + targetName">
+        @for (item of emojis; track item.emoji) {
+          <button
+            type="button"
+            role="menuitem"
+            class="picker-emoji"
+            [attr.aria-label]="'React with ' + item.label"
+            [attr.title]="item.label"
+            (click)="react(item.emoji)"
+          >{{ item.emoji }}</button>
+        }
+        <button
+          type="button"
+          role="menuitem"
+          class="picker-emoji missile-button"
+          [disabled]="missileUsed"
+          [attr.aria-label]="missileUsed ? 'Missile already used this round' : 'Fire missile at ' + targetName"
+          [attr.title]="missileUsed ? 'Missile already used this round' : 'Missile (once per round)'"
+          (click)="fireMissile()"
+        >{{ missileEmoji }}</button>
+      </div>
+    }
+  </div>
+}

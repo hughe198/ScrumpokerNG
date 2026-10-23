@@ -6,6 +6,9 @@
       [vote]="votes[voterId].vote"
       [reveal]="reveal"
       [isSelf]="isSelf(voterId)"
+      [reactions]="reactionsFor(voterId)"
+      [missileUsed]="missileUsed"
+      [votes]="votes"
       (cardClicked)="onCardClicked(voterId)"
     ></app-player-card>
   } @empty {

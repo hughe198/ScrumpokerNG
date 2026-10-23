@@ -40,6 +40,31 @@ describe('PlayerCardRowComponent', () => {
     expect(component.voterIds).toEqual(['id-1', 'id-2']);
   });
 
+  it('reactionsFor returns the voter\'s reactions, or a shared empty array', () => {
+    const r = { id: 'r1', emoji: '👍', from_voter: 'id-1', to_voter: 'id-2', kind: 'normal' as const };
+    component.reactions = { 'id-2': [r] };
+
+    expect(component.reactionsFor('id-2')).toEqual([r]);
+    expect(component.reactionsFor('id-1')).toEqual([]);
+    // Same reference on every call, so change detection doesn't see a new input each pass
+    expect(component.reactionsFor('id-1')).toBe(component.reactionsFor('id-3'));
+  });
+
+  it('passes reactions and missileUsed down to each card', () => {
+    const r = { id: 'r1', emoji: '🔥', from_voter: 'id-1', to_voter: 'id-2', kind: 'normal' as const };
+    component.votes = {
+      'id-1': { voter: 'id-1', vote: '', displayName: 'Alice' },
+      'id-2': { voter: 'id-2', vote: '', displayName: 'Bob' },
+    };
+    component.reactions = { 'id-2': [r] };
+    component.missileUsed = true;
+    fixture.detectChanges();
+
+    const chips = fixture.nativeElement.querySelectorAll('.reaction-chip');
+    expect(chips.length).toBe(1);
+    expect(chips[0].textContent).toContain('🔥');
+  });
+
   it('only emits ownCardClicked for the current voter', () => {
     spyOn(component.ownCardClicked, 'emit');
     component.myVoterID = 'id-1';

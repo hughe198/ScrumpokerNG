@@ -72,16 +72,11 @@
       [votes]="votes"
       [reveal]="reveal"
       [myVoterID]="myVoterID"
+      [reactions]="settings.reactions"
+      [missileUsed]="missileUsed"
       (ownCardClicked)="onOwnCardClicked()"
     ></app-player-card-row>
   }
-
-  <!--
-    TODO (Phase 2 of the frontend plan): reactions land above/below each
-    non-self card, per app-player-card.component.html's TODO marker.
-    Depends on resolving the still-open picker trigger style / emoji set
-    questions before app-reaction-slot can be built.
-  -->
 
   <!-- <h5 class="text-center my-4">Mode: {{currentStats.mode}}</h5> -->
 
