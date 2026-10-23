@@ -149,6 +149,37 @@
   }
 }
 
+/* Phones: the top bar spans the full width with a solid background so
+   content scrolls cleanly under it, wraps if the running timer controls
+   don't fit, and drops the gong status text unless it's ringing. */
+@media (max-width: 575.98px) {
+  .top-bar {
+    left: 0;
+    padding: 8px 12px !important;
+    gap: 6px !important;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    background: var(--bs-body-bg);
+    border-bottom: 1px solid var(--bs-border-color);
+  }
+  .gong-container {
+    padding: 0;
+    gap: 4px;
+  }
+  .gong-switch {
+    padding: 0.25rem 0.5rem;
+  }
+  .gong-indicator:not(.ringing) {
+    display: none;
+  }
+  .gong-indicator {
+    padding: 0.25rem 0.5rem;
+  }
+  .voting-container {
+    padding-top: 110px;
+  }
+}
+
 .loading-container {
   display: flex;
   justify-content: center;

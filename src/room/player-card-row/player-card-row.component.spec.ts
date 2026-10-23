@@ -64,13 +64,4 @@ describe('PlayerCardRowComponent', () => {
     expect(chips.length).toBe(1);
     expect(chips[0].textContent).toContain('🔥');
   });
-
-  it('only emits ownCardClicked for the current voter', () => {
-    spyOn(component.ownCardClicked, 'emit');
-    component.myVoterID = 'id-1';
-    component.onCardClicked('id-2');
-    expect(component.ownCardClicked.emit).not.toHaveBeenCalled();
-    component.onCardClicked('id-1');
-    expect(component.ownCardClicked.emit).toHaveBeenCalled();
-  });
 });

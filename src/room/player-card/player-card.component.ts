@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faCheckSquare, faSquare } from '@fortawesome/free-solid-svg-icons';
 import { ReactionSlotComponent } from '../reaction-slot/reaction-slot.component';
@@ -24,25 +24,10 @@ export class PlayerCardComponent {
   @Input() missileUsed: boolean = false;
   @Input() votes: VotesMap = {};
 
-  // Fires only when this is your own card and votes are still hidden --
-  // the parent decides what to do with it (opening the vote modal is
-  // step 5 of the build order, not wired here yet).
-  @Output() cardClicked = new EventEmitter<void>();
-
   faCheckSquare = faCheckSquare;
   faSquare = faSquare;
 
   get hasVoted(): boolean {
     return this.vote !== '';
-  }
-
-  get isClickable(): boolean {
-    return this.isSelf && !this.reveal;
-  }
-
-  onClick(): void {
-    if (this.isClickable) {
-      this.cardClicked.emit();
-    }
   }
 }

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { PlayerCardComponent } from '../player-card/player-card.component';
 import { IVoteRecord } from '../../i-vote';
 import { IReaction } from '../../i-reaction';
@@ -22,13 +22,8 @@ export class PlayerCardRowComponent {
   @Input() myVoterID: string | null = null;
   // settings.reactions from the server, keyed by the voter receiving them
   @Input() reactions: { [voterId: string]: IReaction[] } = {};
-  // Whether the current user has already fired this round's missile
+  // Whether the current user has already fired their missile in this room
   @Input() missileUsed: boolean = false;
-
-  // Fired when the current user clicks their own card while hidden.
-  // The parent (room.component) is responsible for opening the vote
-  // modal -- this component doesn't know the modal exists.
-  @Output() ownCardClicked = new EventEmitter<void>();
 
   // Stable order: insertion order from the votes map, NOT re-sorted by
   // vote value on reveal. Re-sorting on reveal would reshuffle cards at
@@ -45,11 +40,5 @@ export class PlayerCardRowComponent {
 
   isSelf(voterId: string): boolean {
     return this.myVoterID !== null && voterId === this.myVoterID;
-  }
-
-  onCardClicked(voterId: string): void {
-    if (this.isSelf(voterId)) {
-      this.ownCardClicked.emit();
-    }
   }
 }

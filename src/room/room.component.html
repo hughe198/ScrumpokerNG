@@ -1,6 +1,7 @@
 
-  <!-- Theme toggle in top-right corner -->
-  <div class="position-fixed top-0 end-0 p-3 d-flex align-items-center gap-3" style="z-index: 1001;">
+  <!-- Top bar: timer, theme toggle and gong, fixed top-right
+       (full width and wrapping on phones, see room.component.css) -->
+  <div class="top-bar position-fixed top-0 end-0 p-3 d-flex align-items-center gap-3" style="z-index: 1001;">
     <app-timer></app-timer>
     <app-theme-toggle></app-theme-toggle>
     <div class="gong-container">
@@ -9,13 +10,23 @@
       [class.active]="setGong && gongPermissionGranted"
       [class.pending]="setGong && !gongPermissionGranted"
       (click)="toggleGong()">
-      <span class="gong-label">
+      <!-- Full label from the sm breakpoint up, short label on phones -->
+      <span class="gong-label d-none d-sm-inline">
         @if (!gongPermissionGranted && setGong) {
           Click to Enable Sound
         } @else if (setGong) {
           Alarm ON
         } @else {
           Enable Gong of Shame
+        }
+      </span>
+      <span class="gong-label d-sm-none">
+        @if (!gongPermissionGranted && setGong) {
+          Tap for sound
+        } @else if (setGong) {
+          Gong ON
+        } @else {
+          Gong
         }
       </span>
     </button>
@@ -74,9 +85,7 @@
       [reveal]="reveal"
       [myVoterID]="myVoterID"
       [reactions]="settings.reactions"
-      [missileUsed]="missileUsed"
-      (ownCardClicked)="onOwnCardClicked()"
-    ></app-player-card-row>
+      [missileUsed]="missileUsed"    ></app-player-card-row>
   }
 
   <!-- <h5 class="text-center my-4">Mode: {{currentStats.mode}}</h5> -->

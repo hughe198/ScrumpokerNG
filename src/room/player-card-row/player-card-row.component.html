@@ -8,9 +8,7 @@
       [isSelf]="isSelf(voterId)"
       [reactions]="reactionsFor(voterId)"
       [missileUsed]="missileUsed"
-      [votes]="votes"
-      (cardClicked)="onCardClicked(voterId)"
-    ></app-player-card>
+      [votes]="votes"    ></app-player-card>
   } @empty {
     <p class="text-center w-100">No voters found.</p>
   }

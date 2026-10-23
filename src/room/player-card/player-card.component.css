@@ -56,23 +56,9 @@
   color: var(--bs-body-color);
 }
 
-/* Your own card gets a visual distinction regardless of clickability,
-   so you can find yourself in the row at a glance */
+/* Your own card is outlined so you can find yourself in the row at a glance */
 .player-card.self {
   border-color: var(--bs-primary);
-}
-
-.player-card.clickable {
-  cursor: pointer;
-}
-
-.player-card.clickable:hover {
-  box-shadow: 0 0 0 3px rgb(var(--bs-primary-rgb) / 0.15);
-}
-
-.player-card.clickable:focus-visible {
-  outline: 2px dashed var(--bs-primary);
-  outline-offset: 3px;
 }
 
 /* Hidden-state "voted" feedback -- subtle fill rather than changing

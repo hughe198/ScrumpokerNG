@@ -2,15 +2,7 @@
   class="player-card"
   [attr.data-voter-id]="voterId"
   [class.self]="isSelf"
-  [class.clickable]="isClickable"
   [class.voted]="hasVoted"
-  role="button"
-  [attr.tabindex]="isClickable ? 0 : -1"
-  [attr.aria-pressed]="isSelf ? hasVoted : null"
-  [attr.aria-label]="isClickable ? 'Cast your vote' : null"
-  (click)="onClick()"
-  (keydown.enter)="onClick()"
-  (keydown.space)="onClick()"
 >
   <div class="player-card-body">
     @if (!reveal) {
@@ -27,8 +19,8 @@
   </div>
 </div>
 
-<!-- Outside .player-card so clicks in the picker never reach onClick().
-     On your own card it only shows reactions you've received. -->
+<!-- Sits under the card. On your own card it only shows reactions
+     you've received, with no picker. -->
 <app-reaction-slot
   [targetVoterId]="voterId"
   [reactions]="reactions"

@@ -76,6 +76,23 @@
   width: 70px;
 }
 
+/* Phones: anchor the popover to the full-width top bar instead of the
+   timer, so it can't run off the left edge of the screen. */
+@media (max-width: 575.98px) {
+  .timer {
+    position: static;
+  }
+  .timer-popover {
+    top: 100%;
+    left: 12px;
+    right: 12px;
+    width: auto;
+  }
+  .timer .btn-sm {
+    padding: 0.2rem 0.4rem;
+  }
+}
+
 @keyframes timer-pulse {
   50% { opacity: 0.55; }
 }
