@@ -14,6 +14,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BarchartComponent } from "./barchart/barchart.component";
 import { Statistics } from '../i-statistics';
 import { PlayerCardRowComponent } from './player-card-row/player-card-row.component';
+import { MissileOverlayComponent } from './missile/missile-overlay/missile-overlay.component';
 
 // IVotes was previously exported from i-results.ts; votes are now typed
 // inline there as { [voterId: string]: IVoteRecord }. Local alias so the
@@ -23,7 +24,7 @@ type VotesMap = { [voterId: string]: IVoteRecord };
 @Component({
   selector: 'app-room',
   standalone: true,
-  imports: [FormsModule, VotingCardComponent, BarchartComponent, ThemeToggleComponent, PlayerCardRowComponent],
+  imports: [FormsModule, VotingCardComponent, BarchartComponent, ThemeToggleComponent, PlayerCardRowComponent, MissileOverlayComponent],
   templateUrl: './room.component.html',
   styleUrl: './room.component.css'
 })
@@ -52,6 +53,8 @@ export class RoomComponent implements OnDestroy, OnInit {
   gongPermissionGranted = false;
   currentStats!:Statistics
   isLoading : boolean = true
+  // Cached from localStorage -- read once per room, not on every change detection.
+  missileFiredLocally = false
   private gongAudio!: HTMLAudioElement
   constructor(private cdr:ChangeDetectorRef, private api: ApiService, private localstorage: LocalStorageService, private route:ActivatedRoute, private router:Router) {
     this.userDetails = localstorage.getUserDetails()
@@ -61,6 +64,7 @@ export class RoomComponent implements OnDestroy, OnInit {
     this.gongAudio.volume = 1.0;
     this.route.paramMap.subscribe(params => {
       this.roomId = params.get('roomId')
+      this.missileFiredLocally = !!this.roomId && this.localstorage.hasFiredMissile(this.roomId)
       const userDetails = this.localstorage.getUserDetails();
 
     if (this.roomId && userDetails?.displayName){
@@ -201,6 +205,15 @@ apiVotesConnection.subscribe({
 
 
 
+this.api.getMissileLaunches()
+  .pipe(takeUntil(this.destroy$))
+  .subscribe(launch => {
+    if (launch.fromVoter === this.myVoterID && this.roomId) {
+      this.localstorage.markMissileFired(this.roomId)
+      this.missileFiredLocally = true
+    }
+  });
+
 const apiSettings = this.api.getSettings()
   .pipe(takeUntil(this.destroy$));
 
@@ -281,7 +294,8 @@ exitRoom(){
 }
 
 get missileUsed(): boolean {
-  return !!this.myVoterID && !!this.settings?.missile_used_by.includes(this.myVoterID);
+  return this.missileFiredLocally
+    || (!!this.myVoterID && !!this.settings?.missile_used_by.includes(this.myVoterID));
 }
 
 onOwnCardClicked(): void {

@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactionSlotComponent } from './reaction-slot.component';
 import { ApiService } from '../../api.service';
 import { IReaction } from '../../i-reaction';
+import { MissileService } from '../missile/missile.service';
 
 describe('ReactionSlotComponent', () => {
   let component: ReactionSlotComponent;
@@ -96,6 +97,37 @@ describe('ReactionSlotComponent', () => {
     component.missileUsed = true;
     component.fireMissile();
     expect(api.sendReaction).not.toHaveBeenCalled();
+  });
+
+  it('the picker\'s missile button opens the launch dialog instead of firing', () => {
+    component.pickerOpen = true;
+    fixture.detectChanges();
+
+    (query('.missile-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(api.sendReaction).not.toHaveBeenCalled();
+    expect(component.pickerOpen).toBeFalse();
+    expect(query('app-missile-launch-dialog')).not.toBeNull();
+  });
+
+  it('cancelling the launch dialog sends nothing', () => {
+    component.requestMissile();
+    component.cancelMissile();
+    fixture.detectChanges();
+
+    expect(api.sendReaction).not.toHaveBeenCalled();
+    expect(query('app-missile-launch-dialog')).toBeNull();
+  });
+
+  it('hides a missile chip while that missile is still in flight', () => {
+    const missiles = TestBed.inject(MissileService);
+    component.reactions = [reaction('alice', '💥', 'missile')];
+    missiles.startFlight('alice-💥');
+    expect(component.groups).toEqual([]);
+
+    missiles.land('alice-💥');
+    expect(component.groups.length).toBe(1);
   });
 
   it('disables the missile button when used', () => {

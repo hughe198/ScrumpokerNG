@@ -11,6 +11,7 @@ import { ISettings, ISendSettingsUpdate, DEFAULT_SETTINGS } from './i-settings';
 import { ISendReaction } from './i-reaction';
 import { environment } from './environments/environment';
 import { IName } from './i-name';
+import { IMissileLaunch } from './i-missile';
 
 type OutgoingMessage = ISendVote | ICommand | ISendReaction | ICardChange | ISendSettingsUpdate;
 
@@ -20,6 +21,9 @@ type OutgoingMessage = ISendVote | ICommand | ISendReaction | ICardChange | ISen
 export class ApiService {
   private settings = new BehaviorSubject<ISettings>(DEFAULT_SETTINGS)
   private results = new Subject<IResults>()
+  // One-off events, not state: a late subscriber should NOT replay an
+  // old launch, hence Subject rather than BehaviorSubject.
+  private missileLaunches = new Subject<IMissileLaunch>()
   // Holds this client's own server-assigned voter id once the "joined"
   // message arrives. BehaviorSubject (not Subject) so a component that
   // subscribes even slightly after the message arrives still gets it --
@@ -50,7 +54,7 @@ export class ApiService {
       this.pending.forEach(message => this.socket?.send(JSON.stringify(message)))
       this.pending = []
     }
-    type WebSocketMessage = IJoined | IResults | IError | ISuccess | ISettings;
+    type WebSocketMessage = IJoined | IResults | IError | ISuccess | ISettings | IMissileLaunch;
 
     this.socket.onmessage = (event) => {
       const data: WebSocketMessage = JSON.parse(event.data);
@@ -74,6 +78,9 @@ export class ApiService {
             break
           case "settings":
             this.settings.next(data)
+            break
+          case "missile":
+            this.missileLaunches.next(data)
             break
           default:
             console.warn("Unknown message type:", data);
@@ -159,6 +166,10 @@ export class ApiService {
 
   getVotes(): Observable<IResults> {
     return this.results.asObservable()
+  }
+
+  getMissileLaunches(): Observable<IMissileLaunch> {
+    return this.missileLaunches.asObservable()
   }
 
   private handleSuccessMessage(successMessage: string): void {

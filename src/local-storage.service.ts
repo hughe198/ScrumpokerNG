@@ -34,5 +34,24 @@ export class LocalStorageService {
     localStorage.setItem('votingCard',change)
   }
 
+  // Client-side half of the once-per-room missile rule. The server is the
+  // real check (by display name); this only keeps the button disabled if
+  // the user rejoins the same room under a different name.
+  hasFiredMissile(roomID: string): boolean {
+    try {
+      return localStorage.getItem(`missileFired:${roomID}`) === "true"
+    } catch {
+      return false
+    }
+  }
+
+  markMissileFired(roomID: string): void {
+    try {
+      localStorage.setItem(`missileFired:${roomID}`, "true")
+    } catch (error) {
+      console.log("Error saving to localStorage", error)
+    }
+  }
+
 
 }

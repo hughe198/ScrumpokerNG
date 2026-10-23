@@ -1,0 +1,120 @@
+.launch-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  background: rgb(0 0 0 / 0.55);
+}
+
+.launch-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1051;
+  width: min(360px, calc(100vw - 32px));
+  padding: 24px;
+  border-radius: 14px;
+  text-align: center;
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  border: 2px solid var(--bs-warning);
+  box-shadow: 0 10px 40px rgb(0 0 0 / 0.4);
+}
+
+.launch-dialog.armed {
+  border-color: var(--bs-danger);
+  background: repeating-linear-gradient(-45deg,
+    color-mix(in oklab, var(--bs-danger) 8%, var(--bs-body-bg)) 0 14px,
+    var(--bs-body-bg) 14px 28px);
+}
+
+.launch-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.launch-title {
+  margin: 12px 0 8px;
+  font-size: 1.15rem;
+}
+
+.launch-note {
+  font-size: 0.85rem;
+  color: var(--bs-secondary-color);
+}
+
+.launch-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.launch-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  font-size: 0.8rem;
+  color: var(--bs-danger);
+}
+
+.status-light {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--bs-danger);
+  animation: blink 0.8s steps(2, start) infinite;
+}
+
+.launch-button {
+  display: grid;
+  place-items: center;
+  width: 140px;
+  height: 140px;
+  margin: 16px auto 4px;
+  border-radius: 50%;
+  border: 6px solid #6b0f0f;
+  background: radial-gradient(circle at 35% 30%, #ff6b6b, #c41515 60%, #7a0b0b);
+  box-shadow: 0 6px 0 #4a0707, 0 10px 24px rgb(196 21 21 / 0.5);
+  cursor: pointer;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.launch-button:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #4a0707, 0 4px 12px rgb(196 21 21 / 0.5);
+}
+
+.launch-button:focus-visible {
+  outline: 3px solid var(--bs-warning);
+  outline-offset: 4px;
+}
+
+.launch-button-label {
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.3rem;
+  letter-spacing: 0.1em;
+  text-shadow: 0 2px 2px rgb(0 0 0 / 0.4);
+}
+
+.abort-link {
+  color: var(--bs-secondary-color);
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 6px 0 #4a0707, 0 0 0 0 rgb(255 60 60 / 0.6); }
+  50% { box-shadow: 0 6px 0 #4a0707, 0 0 0 16px rgb(255 60 60 / 0); }
+}
+
+@keyframes blink {
+  to { visibility: hidden; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .launch-button,
+  .status-light {
+    animation: none;
+  }
+}

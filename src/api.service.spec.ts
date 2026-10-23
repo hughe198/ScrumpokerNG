@@ -69,6 +69,18 @@ describe('ApiService', () => {
     expect(JSON.parse(socket.sent[1])).toEqual({ type: 'command', command: 'Reveal_votes' });
   });
 
+  it('passes missile launch events to getMissileLaunches()', () => {
+    const received: string[] = [];
+    service.getMissileLaunches().subscribe(l => received.push(l.reactionID));
+    service.connect('room-1', 'Alice');
+
+    FakeWebSocket.instances[0].onmessage?.({ data: JSON.stringify({
+      type: 'missile', reactionID: 'r1', fromVoter: 'a', toVoter: 'b', fromName: 'Alice', toName: 'Bob',
+    }) });
+
+    expect(received).toEqual(['r1']);
+  });
+
   it('resets settings on disconnect without completing the stream', () => {
     const received: ISettings[] = [];
     let completed = false;

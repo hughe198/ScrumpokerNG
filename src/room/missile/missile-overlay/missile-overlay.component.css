@@ -1,0 +1,73 @@
+/* The effect elements are created in code (not from the template), so
+   they don't get Angular's scoped style attribute -- hence ::ng-deep. */
+:host ::ng-deep .missile-fx {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1060;
+  pointer-events: none;
+  line-height: 1;
+}
+
+:host ::ng-deep .rocket {
+  font-size: 2.6rem;
+  filter: drop-shadow(0 0 6px #ff9b2f) drop-shadow(0 0 14px #ff5a1f);
+}
+
+:host ::ng-deep .blast {
+  font-size: 3rem;
+}
+
+:host ::ng-deep .shockwave {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 4px solid #ff7a1f;
+}
+
+:host ::ng-deep .flash {
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle, #fff3c4, #ff8a2b);
+  opacity: 0;
+}
+
+.missile-banner {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1061;
+  max-width: calc(100vw - 32px);
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+  background: #1f2937;
+  box-shadow: 0 6px 24px rgb(0 0 0 / 0.35);
+  animation: drop-in 300ms ease-out;
+}
+
+.missile-banner.impact {
+  background: #c41515;
+  animation: drop-in 300ms ease-out, rumble 400ms ease-out;
+}
+
+@keyframes drop-in {
+  from { transform: translate(-50%, -40px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+@keyframes rumble {
+  25% { transform: translate(calc(-50% - 4px), 0); }
+  50% { transform: translate(calc(-50% + 4px), 0); }
+  75% { transform: translate(calc(-50% - 2px), 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .missile-banner,
+  .missile-banner.impact {
+    animation: none;
+  }
+}

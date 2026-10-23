@@ -43,11 +43,19 @@
           role="menuitem"
           class="picker-emoji missile-button"
           [disabled]="missileUsed"
-          [attr.aria-label]="missileUsed ? 'Missile already used this round' : 'Fire missile at ' + targetName"
-          [attr.title]="missileUsed ? 'Missile already used this round' : 'Missile (once per round)'"
-          (click)="fireMissile()"
+          [attr.aria-label]="missileUsed ? 'Missile already used in this room' : 'Fire missile at ' + targetName"
+          [attr.title]="missileUsed ? 'Missile already used in this room' : 'Missile (one per room)'"
+          (click)="requestMissile()"
         >{{ missileEmoji }}</button>
       </div>
     }
   </div>
+}
+
+@if (launchDialogOpen) {
+  <app-missile-launch-dialog
+    [targetName]="targetName"
+    (launch)="fireMissile()"
+    (cancel)="cancelMissile()"
+  ></app-missile-launch-dialog>
 }

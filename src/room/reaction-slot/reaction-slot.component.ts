@@ -3,6 +3,8 @@ import { ApiService } from '../../api.service';
 import { IReaction } from '../../i-reaction';
 import { IVoteRecord } from '../../i-vote';
 import { MISSILE_EMOJI, REACTION_EMOJIS } from './reaction-emojis';
+import { MissileService } from '../missile/missile.service';
+import { MissileLaunchDialogComponent } from '../missile/missile-launch-dialog/missile-launch-dialog.component';
 
 type VotesMap = { [voterId: string]: IVoteRecord };
 
@@ -29,7 +31,7 @@ function clientReactionId(): string {
 @Component({
   selector: 'app-reaction-slot',
   standalone: true,
-  imports: [],
+  imports: [MissileLaunchDialogComponent],
   templateUrl: './reaction-slot.component.html',
   styleUrl: './reaction-slot.component.css'
 })
@@ -44,10 +46,15 @@ export class ReactionSlotComponent {
   @Input() readonly: boolean = false;
 
   pickerOpen = false;
+  launchDialogOpen = false;
   readonly emojis = REACTION_EMOJIS;
   readonly missileEmoji = MISSILE_EMOJI;
 
-  constructor(private api: ApiService, private host: ElementRef<HTMLElement>) {}
+  constructor(
+    private api: ApiService,
+    private missiles: MissileService,
+    private host: ElementRef<HTMLElement>,
+  ) {}
 
   get targetName(): string {
     return this.votes[this.targetVoterId]?.displayName || 'this player';
@@ -55,7 +62,8 @@ export class ReactionSlotComponent {
 
   get groups(): IReactionGroup[] {
     const byEmoji = new Map<string, IReactionGroup>();
-    for (const reaction of this.reactions) {
+    // A missile's 💥 chip stays hidden until its flight animation lands.
+    for (const reaction of this.reactions.filter(r => !this.missiles.isInFlight(r.id))) {
       const group = byEmoji.get(reaction.emoji)
         ?? { emoji: reaction.emoji, count: 0, names: [], isMissile: false };
       group.count++;
@@ -97,7 +105,22 @@ export class ReactionSlotComponent {
     this.pickerOpen = false;
   }
 
+  // The picker's 💥 button only opens the launch dialog; the reaction
+  // is sent once the user gets through both confirmation steps.
+  requestMissile(): void {
+    if (this.missileUsed) {
+      return;
+    }
+    this.pickerOpen = false;
+    this.launchDialogOpen = true;
+  }
+
+  cancelMissile(): void {
+    this.launchDialogOpen = false;
+  }
+
   fireMissile(): void {
+    this.launchDialogOpen = false;
     if (this.missileUsed) {
       return;
     }

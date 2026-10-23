@@ -1,0 +1,36 @@
+<div class="launch-backdrop" (click)="abort()"></div>
+
+<div
+  class="launch-dialog"
+  [class.armed]="stage === 'armed'"
+  role="alertdialog"
+  aria-modal="true"
+  aria-labelledby="launch-title"
+>
+  @if (stage === 'confirm') {
+    <div class="launch-icon" aria-hidden="true">⚠️</div>
+    <h4 id="launch-title" class="launch-title">
+      Are you sure you want to launch your missile at {{ targetName }}?
+    </h4>
+    <p class="launch-note">You only get one missile per room. Everyone will see it.</p>
+    <div class="launch-actions">
+      <button type="button" class="btn btn-outline-secondary" (click)="abort()">Cancel</button>
+      <button #primaryAction type="button" class="btn btn-warning fw-bold" (click)="arm()">Arm missile</button>
+    </div>
+  } @else {
+    <div class="launch-status" aria-hidden="true">
+      <span class="status-light"></span> MISSILE ARMED
+    </div>
+    <h4 id="launch-title" class="launch-title">Target: {{ targetName }}</h4>
+    <button
+      #primaryAction
+      type="button"
+      class="launch-button"
+      [attr.aria-label]="'Launch missile at ' + targetName"
+      (click)="fire()"
+    >
+      <span class="launch-button-label">LAUNCH</span>
+    </button>
+    <button type="button" class="btn btn-link abort-link" (click)="abort()">Abort</button>
+  }
+</div>
