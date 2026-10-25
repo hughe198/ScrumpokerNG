@@ -1,7 +1,13 @@
+/* At most 4 cards per row, so results read as a short grid rather than
+   one long line (narrow phones fit 3). 4 cards need 436px (4 x 100px +
+   3 x 12px gaps) and 5 need 548px; 452px leaves slack for sub-pixel
+   rounding at browser zoom levels. A partial last row stays centred. */
 .player-card-row {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
   padding: 12px 0;
+  max-width: 452px;
+  margin: 0 auto;
 }

@@ -5,7 +5,9 @@
   width: 100%;
 }
 
-/* Fixed min-height so cards don't jump as the first reaction lands */
+/* Fixed min-height so cards don't jump as the first reaction lands.
+   max-width matches the 100px player card, so reactions wrap under the
+   card instead of widening it and reflowing the row. */
 .reaction-chips {
   display: flex;
   flex-wrap: wrap;
@@ -13,7 +15,7 @@
   align-items: center;
   gap: 3px;
   min-height: 24px;
-  max-width: 120px;
+  max-width: 100px;
 }
 
 .reaction-chip {
